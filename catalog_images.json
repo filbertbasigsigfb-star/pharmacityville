@@ -1,0 +1,162 @@
+{
+  "Calcium Carbonate 500mg": {
+    "image": "/static/img/medicines/calcium-carbonate-500mg-product.webp",
+    "tablet": true
+  },
+  "Ferrous Sulfate 325mg": {
+    "image": "/static/img/medicines/ferrous-sulfate-325mg-product.webp",
+    "tablet": true
+  },
+  "Vitamin B-Complex": {
+    "image": "/static/img/medicines/vitamin-b-complex-product.webp",
+    "tablet": true
+  },
+  "Folic Acid 400mcg": {
+    "image": "/static/img/medicines/folic-acid-400mcg-product.webp",
+    "tablet": true
+  },
+  "Magnesium 250mg": {
+    "image": "/static/img/medicines/magnesium-250mg-product.webp",
+    "tablet": true
+  },
+  "Probiotic Capsules": {
+    "image": "/static/img/medicines/probiotic-capsules-product.webp",
+    "tablet": false
+  },
+  "Saline Nasal Spray 0.65%": {
+    "image": "/static/img/medicines/saline-nasal-spray-0-65-product.webp",
+    "tablet": false
+  },
+  "Petroleum Jelly 50g": {
+    "image": "/static/img/medicines/petroleum-jelly-50g-product.webp",
+    "tablet": false
+  },
+  "Zinc Oxide Cream 10%": {
+    "image": "/static/img/medicines/zinc-oxide-cream-10-product.webp",
+    "tablet": false
+  },
+  "Povidone-Iodine 10%": {
+    "image": "/static/img/medicines/povidone-iodine-10-product.webp",
+    "tablet": false
+  },
+  "Isopropyl Alcohol 70% 100mL": {
+    "image": "/static/img/medicines/isopropyl-alcohol-70-100ml-product.webp",
+    "tablet": false
+  },
+  "Sterile Gauze Pads 5-Pack": {
+    "image": "/static/img/medicines/sterile-gauze-pads-5-pack-product.webp",
+    "tablet": false
+  },
+  "Adhesive Bandages 20-Pack": {
+    "image": "/static/img/medicines/adhesive-bandages-20-pack-product.webp",
+    "tablet": false
+  },
+  "Digital Thermometer": {
+    "image": "/static/img/medicines/digital-thermometer-product.webp",
+    "tablet": false
+  },
+  "Saline Eye Drops": {
+    "image": "/static/img/medicines/saline-eye-drops-product.webp",
+    "tablet": false
+  },
+  "Electrolyte Drink Powder": {
+    "image": "/static/img/medicines/electrolyte-drink-powder-product.webp",
+    "tablet": false
+  },
+  "Psyllium Husk Sachets": {
+    "image": "/static/img/medicines/psyllium-husk-sachets-product.webp",
+    "tablet": false
+  },
+  "Simethicone 80mg": {
+    "image": "/static/img/medicines/simethicone-80mg-product.webp",
+    "tablet": true
+  },
+  "Throat Lozenges": {
+    "image": "/static/img/medicines/throat-lozenges-product.webp",
+    "tablet": false
+  },
+  "Sunscreen SPF 30": {
+    "image": "/static/img/medicines/sunscreen-spf-30-product.webp",
+    "tablet": false
+  },
+  "Vitamin B12 500mcg": {
+    "image": "/static/img/medicines/vitamin-b12-500mcg-product.webp",
+    "tablet": true
+  },
+  "Vitamin E 400 IU": {
+    "image": "/static/img/medicines/vitamin-e-400iu-product.webp",
+    "tablet": false
+  },
+  "Calcium + Vitamin D Tablets": {
+    "image": "/static/img/medicines/calcium-vitamin-d-tablets-product.webp",
+    "tablet": true
+  },
+  "Omega-3 Softgels 1000mg": {
+    "image": "/static/img/medicines/omega-3-softgels-1000mg-product.webp",
+    "tablet": false
+  },
+  "Vitamin C Chewable 250mg": {
+    "image": "/static/img/medicines/vitamin-c-chewable-250mg-product.webp",
+    "tablet": true
+  },
+  "Oral Zinc 20mg": {
+    "image": "/static/img/medicines/oral-zinc-20mg-product.webp",
+    "tablet": true
+  },
+  "Guaifenesin Syrup 100mg/5mL": {
+    "image": "/static/img/medicines/guaifenesin-syrup-batch2.webp",
+    "tablet": false
+  },
+  "Dextromethorphan Syrup 10mg/5mL": {
+    "image": "/static/img/medicines/dextromethorphan-syrup-batch2.webp",
+    "tablet": false
+  },
+  "Loperamide 2mg": {
+    "image": "/static/img/medicines/loperamide-2mg-product.webp",
+    "tablet": true
+  },
+  "Bisacodyl 5mg": {
+    "image": "/static/img/medicines/bisacodyl-5mg-batch2.webp",
+    "tablet": true
+  },
+  "Senna Tablets": {
+    "image": "/static/img/medicines/senna-tablets-batch2.webp",
+    "tablet": true
+  },
+  "Clotrimazole Cream 1%": {
+    "image": "/static/img/medicines/clotrimazole-cream-1-batch2.webp",
+    "tablet": false
+  },
+  "Calamine Lotion": {
+    "image": "/static/img/medicines/calamine-lotion-product.webp",
+    "tablet": false
+  },
+  "Benzoyl Peroxide Gel 2.5%": {
+    "image": "/static/img/medicines/benzoyl-peroxide-gel-batch2.webp",
+    "tablet": false
+  },
+  "Salicylic Acid Acne Gel 2%": {
+    "image": "/static/img/medicines/salicylic-acid-acne-gel-batch2.webp",
+    "tablet": false
+  },
+  "Glycerin Suppositories": {
+    "image": "/static/img/medicines/glycerin-suppositories-batch2.webp",
+    "tablet": false
+  },
+  "Antiseptic Mouthwash 250mL": {
+    "image": "/static/img/medicines/antiseptic-mouthwash-batch2.webp",
+    "tablet": false
+  },
+  "Menthol Nasal Inhaler": {
+    "image": "/static/img/medicines/menthol-nasal-inhaler-batch2.webp",
+    "tablet": false
+  },
+  "Alcohol Prep Pads 100-Pack": {
+    "image": "/static/img/medicines/alcohol-prep-pads-real.webp",
+    "tablet": false
+  },
+  "Nitrile Gloves 50-Pack": {
+    "image": "/static/img/medicines/nitrile-gloves-product.webp",
+    "tablet": false
+  }
+}

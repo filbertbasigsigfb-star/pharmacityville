@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Data / uploads: never commit customer info or prescriptions
+instance/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+private_uploads/
+uploads/
+# Python / tools
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+# Operational output and backups
+*backup*/
+*_backup_*.db
+.DS_Store
+Thumbs.db
