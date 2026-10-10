@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Prescription Request | Pharmacityville{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <h1 class="h2 mb-3">Request approval: {{ medicine.name }}</h1>
+  <div class="alert alert-warning">This medicine requires a prescription. Upload your own valid prescription for pharmacist review. Approval is not automatic, and an order is only permitted for the approved quantity.</div>
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('prescriptions.request_prescription', medicine_id=medicine.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <label class="form-label" for="quantity">Quantity requested (1–999)</label>
+      <input class="form-control mb-3" type="number" id="quantity" name="quantity" min="1" max="999" step="1" value="{{ request.form.get('quantity', '1') }}" required>
+      <label class="form-label" for="document">Prescription image or PDF</label>
+      <input class="form-control" type="file" id="document" name="document" accept=".png,.jpg,.jpeg,.pdf" required>
+      <div class="form-text mb-3">PDF, PNG or JPG, maximum 4 MB. Upload only a prescription you are authorized to share.</div>
+      <button class="btn btn-success" type="submit">Submit for review</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('customer.catalog') }}">Back to catalog</a>
+    </form>
+  </div></div>
+  <p class="small text-muted mt-3">School project demo. A licensed pharmacist must verify authenticity, eligibility, validity, and legal dispensing requirements before any real sale.</p>
+</div></div>
+{% endblock %}

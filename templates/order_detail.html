@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} | Pharmacityville{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div><h1 class="h2 mb-1">Order #{{ order.id }}</h1>
+    <p class="text-muted mb-0">Placed {{ order.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('customer.my_orders') }}">All My Orders</a>
+    <a class="btn btn-outline-success" href="{{ url_for('support.new_ticket', order_id=order.id) }}">Report an Issue</a>
+  </div>
+</div>
+<section class="card border-0 shadow-sm mb-4" aria-label="Order progress">
+  <div class="card-body p-4">
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+      <h2 class="h5 mb-0">Order status</h2>
+      <span class="badge {{ 'text-bg-success' if order.status == 'Completed' else 'text-bg-danger' if order.status == 'Cancelled' else 'text-bg-warning' if order.status == 'Pending' else 'text-bg-info' }}">{{ order.status }}</span>
+    </div>
+    {% if order.payment_attempt %}
+      <div class="alert alert-info mb-3">
+        <strong>Online payment:</strong> {{ order.payment_attempt.state }}.
+        {% if order.payment_attempt.state == 'Pending' %}Payment is awaiting provider confirmation. Do not pay twice.
+          <a href="{{ order.payment_attempt.checkout_url }}" rel="noopener noreferrer" class="btn btn-sm btn-outline-success ms-2">Continue payment</a>
+        {% elif order.payment_attempt.state == 'LatePaid' %}Payment arrived after cancellation; contact the pharmacy for refund assistance.
+        {% endif %}
+      </div>
+    {% elif order.payment_method == 'cod' %}
+      <div class="alert {{ 'alert-success' if order.cod_paid_at else 'alert-warning' }} mb-3">
+        <strong>Cash on Delivery:</strong>
+        {% if order.cod_paid_at %}Cash payment recorded on {{ order.cod_paid_at.strftime('%Y-%m-%d %H:%M') }} UTC.
+        {% elif order.status == 'Cancelled' %}Cancelled — no cash payment received.
+        {% else %}Unpaid — pay cash to the pharmacy's delivery representative when your order is delivered. The pharmacy will confirm delivery arrangements.{% endif %}
+      </div>
+      <div class="card bg-light border-0 mb-3"><div class="card-body">
+        <h3 class="h6">Delivery details</h3>
+        <div><strong>Recipient:</strong> {{ order.delivery_name }}</div>
+        <div><strong>Mobile:</strong> {{ order.delivery_phone }}</div>
+        <div><strong>Address:</strong> {{ order.delivery_address }}</div>
+      </div></div>
+    {% else %}<p class="text-muted small">Payment method: Pay at pickup (unpaid).</p>{% endif %}
+    {% if order.status == 'Awaiting Payment' %}
+      <div class="alert alert-warning mb-0">This order is reserved while you complete payment. Processing begins only after verified payment confirmation.</div>
+    {% elif order.status == 'Cancelled' %}
+      <div class="alert alert-secondary mb-0"><i class="bi bi-x-circle" aria-hidden="true"></i> This order was cancelled. Stock was returned to the inventory.</div>
+    {% else %}
+      {% set order_steps = ['Pending', 'Preparing', 'Ready', 'Completed'] %}
+      {% set current_step = order_steps.index(order.status) if order.status in order_steps else 0 %}
+      <ol class="order-progress mb-3" aria-label="Order stages">
+        {% for step in order_steps %}
+        <li class="{{ 'done' if loop.index0 < current_step else 'current' if loop.index0 == current_step else 'upcoming' }}"
+            {{ 'aria-current="step"'|safe if loop.index0 == current_step else '' }}>
+          <span class="order-progress-circle">{% if loop.index0 < current_step %}<i class="bi bi-check" aria-hidden="true"></i>{% else %}{{ loop.index }}{% endif %}</span>
+          <span class="order-progress-label">{{ step }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+      <p class="text-muted small mb-0" role="status">
+        {% if order.status == 'Pending' %}The pharmacy has received your order and will review it.
+        {% elif order.status == 'Preparing' %}Your order is being prepared.
+        {% elif order.status == 'Ready' %}Your order is marked ready. Contact the pharmacy to confirm pickup or delivery arrangements.
+        {% elif order.status == 'Completed' %}Your order has been marked completed. Thank you for choosing Pharmacityville.
+        {% endif %}
+      </p>
+    {% endif %}
+  </div>
+</section>
+<div class="card shadow-sm border-0"><div class="card-body p-3 p-md-4">
+  <h2 class="h5 mb-3">Order items</h2>
+  <div class="table-responsive"><table class="table align-middle">
+    <thead><tr><th scope="col">Medicine</th><th scope="col">Quantity</th><th scope="col">Unit price</th><th scope="col">Subtotal</th></tr></thead>
+    <tbody>{% for item in order.items %}
+      <tr><td>{{ item.medicine.name if item.medicine else 'Unavailable medicine' }}</td><td>{{ item.quantity }}</td>
+      <td>₱{{ '%.2f'|format(item.unit_price) }}</td><td>₱{{ '%.2f'|format(item.quantity * item.unit_price) }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  <p class="h4 text-end mb-0">Total: ₱{{ '%.2f'|format(order.total) }}</p>
+</div></div>
+{% if (order.status == 'Pending' and (not order.payment_attempt or order.payment_attempt.state != 'Paid')) or (order.status == 'Awaiting Payment' and order.payment_attempt and order.payment_attempt.state == 'Pending') %}
+  <button class="btn btn-outline-danger mt-3" type="button" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">Cancel Unpaid Order</button>
+  <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title fs-5" id="cancelOrderModalLabel">Cancel order?</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">Cancel order #{{ order.id }} and return its medicines to stock? This cannot be undone.</div>
+    <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Keep Order</button>
+      <form method="post" action="{{ url_for('customer.cancel_order', order_id=order.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="btn btn-danger" type="submit">Yes, Cancel</button>
+      </form>
+    </div>
+  </div></div></div>
+{% endif %}
+{% endblock %}

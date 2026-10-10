@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}My Reports | Pharmacityville{% endblock %}
+{% block content %}
+<section class="d-flex justify-content-between flex-wrap align-items-center gap-3 mb-4">
+  <div><span class="text-uppercase text-success fw-semibold small">Customer Support</span>
+    <h1 class="h2 mb-1">My Reports</h1><p class="text-muted mb-0">Track issues and read responses from the pharmacy team.</p></div>
+  <a class="btn btn-success" href="{{ url_for('support.new_ticket') }}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Report a Problem</a>
+</section>
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>Report</th><th>Category</th><th>Status</th><th>Last activity</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for ticket in tickets %}
+      <tr><td><div class="fw-semibold">#{{ ticket.id }} — {{ ticket.subject }}</div>
+        <span class="text-muted small">Created {{ ticket.created_at.strftime('%d %b %Y') }}</span></td>
+        <td>{{ ticket.category }}</td>
+        <td><span class="badge {{ 'text-bg-success' if ticket.status == 'Resolved' else 'text-bg-warning' if ticket.status == 'Open' else 'text-bg-info' }}">{{ ticket.status }}</span></td>
+        <td>{{ ticket.updated_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+        <td><a class="btn btn-sm btn-outline-success" href="{{ url_for('support.ticket_detail', ticket_id=ticket.id) }}">View</a></td></tr>
+    {% else %}
+      <tr><td colspan="5" class="text-center text-muted py-5">No reports yet. Use <strong>Report a Problem</strong> if you need help with an order or the website.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

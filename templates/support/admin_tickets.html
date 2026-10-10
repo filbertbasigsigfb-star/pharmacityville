@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Customer Reports | Pharmacityville Admin{% endblock %}
+{% block content %}
+<header class="mb-4"><span class="admin-page-kicker">CUSTOMER SERVICE</span>
+  <h1 class="h2 mb-1">Customer Reports</h1>
+  <p class="text-muted">Review issues, answer customer messages, and resolve reports.</p>
+</header>
+<div class="row row-cols-1 row-cols-sm-3 g-3 mb-4">
+  {% for status, label in [('Open','Open'), ('In Progress','In progress'), ('Resolved','Resolved')] %}
+  <div class="col"><div class="card shadow-sm border-0"><div class="card-body">
+    <p class="text-muted small mb-1">{{ label }}</p><div class="h3 mb-0">{{ counts[status] }}</div>
+  </div></div></div>{% endfor %}
+</div>
+<div class="card shadow-sm border-0"><div class="card-body">
+  <form class="d-flex flex-wrap align-items-center gap-2 mb-3" method="get">
+    <label for="status" class="form-label mb-0">Filter status</label>
+    <select class="form-select w-auto" id="status" name="status">
+      {% for status in ['All', 'Open', 'In Progress', 'Resolved'] %}<option {{ 'selected' if selected == status else '' }}>{{ status }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-success">Apply</button>
+  </form>
+  <div class="table-responsive"><table class="table table-hover align-middle">
+    <thead class="table-light"><tr><th>ID</th><th>Customer</th><th>Issue</th><th>Order</th><th>Status</th><th>Updated</th><th></th></tr></thead>
+    <tbody>{% for ticket in tickets %}
+      <tr><td>#{{ ticket.id }}</td><td>{{ ticket.user.name }}<div class="small text-muted">{{ ticket.user.email }}</div></td>
+        <td><strong>{{ ticket.subject }}</strong><div class="small text-muted">{{ ticket.category }}</div></td>
+        <td>{% if ticket.order_id %}#{{ ticket.order_id }}{% else %}—{% endif %}</td>
+        <td><span class="badge {{ 'text-bg-success' if ticket.status == 'Resolved' else 'text-bg-warning' if ticket.status == 'Open' else 'text-bg-info' }}">{{ ticket.status }}</span></td>
+        <td>{{ ticket.updated_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+        <td><a href="{{ url_for('admin_support.ticket_detail', ticket_id=ticket.id) }}" class="btn btn-outline-success btn-sm">Review</a></td></tr>
+    {% else %}<tr><td colspan="7" class="text-center py-5 text-muted">No customer reports in this view.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div></div>
+{% endblock %}

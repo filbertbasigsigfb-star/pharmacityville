@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Report a Problem | Pharmacityville{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+  <div class="mb-4"><a class="text-decoration-none small" href="{{ url_for('support.my_tickets') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> My Reports</a>
+    <h1 class="h2 mt-2 mb-1">Report a Problem</h1>
+    <p class="text-muted">Tell us what happened. We'll save your report in the private admin inbox.</p></div>
+  <div class="alert alert-info"><i class="bi bi-shield-lock" aria-hidden="true"></i> Please don't include passwords, full payment-card information, or prescription documents in your report.</div>
+  <div class="card border-0 shadow-sm"><div class="card-body p-4">
+  <form method="post" action="{{ url_for('support.new_ticket') }}">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="category">Problem category *</label>
+        <select id="category" name="category" class="form-select" required>
+          {% for category in categories %}<option value="{{ category }}" {{ 'selected' if data.category == category else '' }}>{{ category }}</option>{% endfor %}
+        </select></div>
+      <div class="col-md-6"><label class="form-label" for="order_id">Related order (optional)</label>
+        <select id="order_id" name="order_id" class="form-select"><option value="">Not about a specific order</option>
+          {% for order in orders %}<option value="{{ order.id }}" {{ 'selected' if data.order_id == order.id|string else '' }}>#{{ order.id }} — {{ order.status }}</option>{% endfor %}
+        </select></div>
+      <div class="col-12"><label class="form-label" for="subject">Subject *</label>
+        <input type="text" class="form-control" id="subject" name="subject" maxlength="150" minlength="5" required value="{{ data.subject }}" placeholder="Example: My order has not arrived"></div>
+      <div class="col-12"><label class="form-label" for="message">Describe the problem *</label>
+        <textarea id="message" name="message" class="form-control" rows="6" minlength="10" maxlength="2000" required placeholder="Describe what happened and how we can help">{{ data.message }}</textarea>
+        <div class="form-text">10–2,000 characters. Reports are visible only to you and authorized admins.</div></div>
+      <div class="col-12 d-flex flex-wrap gap-2"><button type="submit" class="btn btn-success">Submit Report</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('support.my_tickets') }}">Cancel</a></div>
+    </div>
+  </form></div></div>
+</div></div>
+{% endblock %}

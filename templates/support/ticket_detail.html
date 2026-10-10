@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Report #{{ ticket.id }} | Pharmacityville{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-9">
+  <a class="text-decoration-none small" href="{{ url_for('support.my_tickets') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> My Reports</a>
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 my-3">
+    <div><span class="text-uppercase text-success fw-semibold small">Report #{{ ticket.id }}</span><h1 class="h3 mb-1">{{ ticket.subject }}</h1>
+      <div class="text-muted small">{{ ticket.category }} {% if ticket.order_id %}· Order #{{ ticket.order_id }}{% endif %}</div></div>
+    <span class="badge {{ 'text-bg-success' if ticket.status == 'Resolved' else 'text-bg-warning' if ticket.status == 'Open' else 'text-bg-info' }} fs-6">{{ ticket.status }}</span>
+  </div>
+  <div class="card shadow-sm border-0 mb-4"><div class="card-body p-4">
+    <h2 class="h5 mb-4">Conversation</h2>
+    {% for message in ticket.messages %}
+      <article class="support-message {{ 'support-message-admin' if message.author.role == 'admin' else 'support-message-customer' }} mb-3">
+        <div class="d-flex justify-content-between align-items-center gap-2 small mb-2">
+          <strong>{{ 'Pharmacy Support' if message.author.role == 'admin' else 'You' }}</strong>
+          <time class="text-muted">{{ message.created_at.strftime('%d %b %Y, %I:%M %p') }}</time>
+        </div>
+        <div class="support-message-body">{{ message.body }}</div>
+      </article>
+    {% endfor %}
+  </div></div>
+  <div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <h2 class="h5">Add a Reply</h2><p class="text-muted small">If this was resolved, replying will reopen the report.</p>
+    <form method="post" action="{{ url_for('support.customer_reply', ticket_id=ticket.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <label class="form-label" for="message">Message *</label>
+      <textarea class="form-control mb-3" id="message" name="message" rows="4" minlength="10" maxlength="2000" required></textarea>
+      <button class="btn btn-success" type="submit">Send Reply</button>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}
