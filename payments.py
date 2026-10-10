@@ -75,7 +75,7 @@ def create_provider_session(method, reference, total, customer_id, email, custom
         "allowed_payment_channels": METHODS[method],
         "description": "Pharmacityville medicine order " + reference,
         "customer": {
-            "reference_id": f"PVCCUSTOMER{customer_id}",
+            "reference_id": f"PVCCUSTOMER{customer_id}{reference.replace('-', '')}",
             "type": "INDIVIDUAL",
             "email": email,
             "individual_detail": individual_detail,
