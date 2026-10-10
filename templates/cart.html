@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Your Cart | Pharmacityville{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center gap-2 mb-4"><h1 class="h2 mb-0">Your Cart</h1><a class="btn btn-outline-success" href="{{ url_for('customer.catalog') }}">Continue Shopping</a></div>
+{% for problem in problems %}<div class="alert alert-warning">{{ problem }}</div>{% endfor %}
+{% if lines %}
+<div class="table-responsive card shadow-sm p-3"><table class="table align-middle mb-0">
+  <thead><tr><th>Medicine</th><th>Price</th><th>Stock</th><th>Quantity</th><th>Subtotal</th><th></th></tr></thead>
+  <tbody>{% for line in lines %}
+    <tr>
+      <td>{% if line.medicine %}<strong>{{ line.medicine.name }}</strong>{% if line.medicine.requires_prescription %}<div class="badge text-bg-warning">Prescription required</div>
+       <a class="small d-block" href="{{ url_for('prescriptions.request_prescription', medicine_id=line.id) }}">Request approval</a>{% endif %}{% else %}<span class="text-danger">Unavailable item #{{ line.id }}</span>{% endif %}</td>
+      <td>{% if line.medicine %}₱{{ '%.2f'|format(line.medicine.price) }}{% else %}—{% endif %}</td>
+      <td>{% if line.medicine %}{{ line.medicine.stock }}{% else %}—{% endif %}</td>
+      <td>
+        {% if line.medicine %}<form class="d-flex gap-2" method="post" action="{{ url_for('customer.update_cart', medicine_id=line.id) }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <label for="cart-qty-{{ line.id }}" class="visually-hidden">Quantity for {{ line.medicine.name }}</label>
+          <input id="cart-qty-{{ line.id }}" class="form-control cart-quantity" name="quantity" type="number" min="1" max="{{ [line.medicine.stock, 999]|min }}" step="1" value="{{ line.quantity }}" required>
+          <button class="btn btn-outline-primary btn-sm" type="submit">Update</button>
+        </form>{% else %}{{ line.quantity }}{% endif %}
+      </td>
+      <td>₱{{ '%.2f'|format(line.subtotal) }}</td>
+      <td><form method="post" action="{{ url_for('customer.remove_from_cart', medicine_id=line.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger btn-sm" type="submit">Remove</button></form></td>
+    </tr>
+  {% endfor %}</tbody>
+</table></div>
+<div class="text-end mt-4"><p class="h4">Total: ₱{{ '%.2f'|format(total) }}</p><a href="{{ url_for('customer.checkout') }}" class="btn btn-success {% if problems %}disabled{% endif %}" {% if problems %}aria-disabled="true"{% endif %}>Go to Checkout</a></div>
+{% else %}<div class="alert alert-info">Your cart is empty. <a href="{{ url_for('customer.catalog') }}">Browse medicines</a>.</div>{% endif %}
+{% endblock %}

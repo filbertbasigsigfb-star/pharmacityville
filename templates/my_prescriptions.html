@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}My Prescription Requests | Pharmacityville{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2"><h1 class="h2">My Prescription Requests</h1><a class="btn btn-outline-success" href="{{ url_for('customer.catalog') }}">Browse medicines</a></div>
+<div class="alert alert-info">Approved quantities can be added to your cart and purchased through checkout. Requests are reviewed manually.</div>
+<div class="table-responsive card shadow-sm p-3"><table class="table align-middle"><thead><tr><th>Medicine</th><th>Requested</th><th>Available approval</th><th>Status</th><th>Document</th></tr></thead><tbody>
+{% for row in requests %}<tr><td>{{ row.medicine.name }}</td><td>{{ row.quantity }}</td><td>{% if row.status == 'Approved' and row.expires_at and row.expires_at > now %}{{ row.quantity - row.used_quantity }}{% else %}0{% endif %}</td><td><span class="badge {{ 'text-bg-success' if row.status == 'Approved' else ('text-bg-danger' if row.status == 'Rejected' else 'text-bg-warning') }}">{{ row.status }}</span>{% if row.status == 'Approved' and row.expires_at and row.expires_at <= now %}<div class="small text-danger">Expired</div>{% endif %}</td><td><a href="{{ url_for('prescriptions.prescription_file', request_id=row.id) }}">Download</a></td></tr>
+{% else %}<tr><td colspan="5" class="text-center text-muted">No requests yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

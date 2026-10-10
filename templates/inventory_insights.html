@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Inventory Insights | Pharmacityville{% endblock %}
+{% block content %}
+<div class="pvc-insights-page">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <p class="small text-success fw-semibold text-uppercase mb-1">Inventory planner</p>
+      <h1 class="h2 mb-1">Inventory Insights</h1>
+      <p class="text-muted mb-0">Understand stock levels and plan replenishment without changing inventory.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1" aria-hidden="true"></i> Print</button>
+      <a href="{{ url_for('admin_medicines.list_medicines') }}" class="btn btn-outline-success"><i class="bi bi-capsule-pill me-1" aria-hidden="true"></i> Manage Medicines</a>
+    </div>
+  </div>
+  <div class="alert alert-info small" role="note">
+    <strong>Planning estimates only:</strong> Inventory value is <em>stock × retail list price</em>, not purchase cost or earned revenue. Suggested quantities assume a target of {{ target_stock }} units and should be reviewed manually.
+  </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+    <div class="col"><div class="card pvc-insight-metric h-100"><div class="card-body"><div class="text-muted small">Total products</div><div class="h2 mt-2 mb-1">{{ total_count }}</div><div class="small text-muted">{{ stock_units }} units held</div></div></div></div>
+    <div class="col"><div class="card pvc-insight-metric h-100"><div class="card-body"><div class="text-muted small">Out of stock</div><div class="h2 text-danger mt-2 mb-1">{{ out_count }}</div><div class="small text-muted">No units available</div></div></div></div>
+    <div class="col"><div class="card pvc-insight-metric h-100"><div class="card-body"><div class="text-muted small">Low-stock products</div><div class="h2 text-warning mt-2 mb-1">{{ low_count }}</div><div class="small text-muted">1–{{ threshold }} units</div></div></div></div>
+    <div class="col"><div class="card pvc-insight-metric h-100"><div class="card-body"><div class="text-muted small">Retail inventory value</div><div class="h3 mt-2 mb-1">₱{{ '{:,.2f}'.format(inventory_value) }}</div><div class="small text-muted">Not cost or revenue</div></div></div></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-lg-7"><section class="card shadow-sm h-100"><div class="card-body">
+      <h2 class="h5">Restock planning</h2>
+      <p class="text-muted small">Choose which items need attention. Results and CSV include zero-stock items.</p>
+      <form method="get" class="d-flex gap-2 flex-wrap align-items-end" action="{{ url_for('inventory_insights.inventory_insights') }}">
+        <div><label class="form-label" for="insight-threshold">Low-stock threshold</label>
+          <select class="form-select" id="insight-threshold" name="threshold">
+            {% for number in valid_thresholds %}<option value="{{ number }}" {{ 'selected' if number == threshold else '' }}>{{ number }} units</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-success" type="submit">Apply threshold</button>
+        <a class="btn btn-outline-success" href="{{ url_for('inventory_insights.reorder_csv', threshold=threshold) }}"><i class="bi bi-download me-1" aria-hidden="true"></i> Download restock CSV</a>
+      </form>
+      <p class="mb-0 mt-3 small"><strong>{{ medicines|length }}</strong> products need attention at this threshold · <strong>{{ suggested_units }}</strong> units would bring them to {{ target_stock }} each.</p>
+    </div></section></div>
+    <div class="col-lg-5"><section class="card shadow-sm h-100"><div class="card-body">
+      <h2 class="h5">Affected categories</h2>
+      {% if category_rows %}
+        {% for label, count in category_rows %}
+          <div class="pvc-category-count"><span class="text-truncate" title="{{ label }}">{{ label }}</span><span class="badge text-bg-warning">{{ count }}</span></div>
+        {% endfor %}
+      {% else %}<p class="text-success small mb-0">No products are at or below the selected threshold.</p>{% endif %}
+    </div></section></div>
+  </div>
+
+  <section class="card shadow-sm"><div class="card-header bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <h2 class="h5 mb-0">Restock review list</h2><span class="small text-muted">Read-only · {{ medicines|length }} items</span>
+  </div><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+    <thead><tr><th scope="col">Medicine</th><th scope="col">Category</th><th scope="col">Current stock</th><th scope="col">To reach {{ target_stock }}</th><th scope="col">Retail unit price</th><th scope="col">Action</th></tr></thead>
+    <tbody>{% for medicine in medicines %}
+      <tr>
+        <td class="fw-semibold">{{ medicine.name }}{% if medicine.requires_prescription %}<span class="badge text-bg-warning ms-1">Rx</span>{% endif %}</td>
+        <td>{{ medicine.category }}</td>
+        <td><span class="badge {{ 'text-bg-danger' if medicine.stock <= 0 else 'text-bg-warning' }}">{{ medicine.stock }}</span></td>
+        <td class="fw-semibold">{{ [target_stock - medicine.stock, 0]|max }}</td>
+        <td>₱{{ '%.2f'|format(medicine.price) }}</td>
+        <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_medicines.edit_medicine', medicine_id=medicine.id) }}">Review medicine</a></td>
+      </tr>
+    {% else %}<tr><td colspan="6" class="text-center text-success py-4">All products are above {{ threshold }} units. No restock candidates.</td></tr>{% endfor %}</tbody>
+  </table></div></section>
+</div>
+{% endblock %}

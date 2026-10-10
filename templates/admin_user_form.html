@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit User' if user else 'Add User' }} | Pharmacityville{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-xl-8 col-lg-9">
+  <section class="admin-page-intro mb-4">
+    <span class="admin-page-kicker">ADMINISTRATION / ACCOUNTS</span>
+    <h1 class="admin-page-title">{{ 'Edit User' if user else 'Add User' }}</h1>
+    <p class="text-muted mb-0">{{ 'Update the account name, email or role.' if user else 'Create an account without public registration.' }}</p>
+  </section>
+  <div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <form method="post" action="{{ url_for('admin_users.edit_user', user_id=user.id) if user else url_for('admin_users.create_user') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-3"><label class="form-label" for="name">Full name *</label>
+        <input class="form-control" id="name" name="name" type="text" maxlength="100" required value="{{ form_data.name }}"></div>
+      <div class="mb-3"><label class="form-label" for="email">Email *</label>
+        <input class="form-control" id="email" name="email" type="email" maxlength="120" required value="{{ form_data.email }}"></div>
+      <div class="mb-3"><label class="form-label" for="role">Role *</label>
+        <select class="form-select" id="role" name="role" required>
+          <option value="customer" {{ 'selected' if form_data.role == 'customer' else '' }}>Customer</option>
+          <option value="admin" {{ 'selected' if form_data.role == 'admin' else '' }}>Administrator</option>
+        </select>
+        <div class="form-text">Only assign the Administrator role to trusted staff.</div>
+      </div>
+      {% if not user %}
+        <div class="row g-3 mb-3">
+          <div class="col-md-6"><label class="form-label" for="password">Initial password *</label>
+            <input class="form-control" type="password" id="password" name="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+          <div class="col-md-6"><label class="form-label" for="confirm_password">Confirm password *</label>
+            <input class="form-control" type="password" id="confirm_password" name="confirm_password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+        </div>
+      {% else %}
+        <p class="text-muted small">To change this user's password, use <a href="{{ url_for('admin_users.reset_password', user_id=user.id) }}">Reset Password</a>.</p>
+      {% endif %}
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-success" type="submit">{{ 'Save Changes' if user else 'Create User' }}</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin_users.list_users') }}">Cancel</a>
+      </div>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

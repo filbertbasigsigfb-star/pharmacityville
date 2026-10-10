@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Checkout | Pharmacityville{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">Review and Pay</h1>
+{% for problem in problems %}<div class="alert alert-warning">{{ problem }}</div>{% endfor %}
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <div class="table-responsive"><table class="table align-middle">
+    <thead><tr><th>Medicine</th><th>Quantity</th><th>Subtotal</th></tr></thead>
+    <tbody>{% for line in lines %}<tr>
+      <td>{{ line.medicine.name if line.medicine else 'Unavailable item' }}</td>
+      <td>{{ line.quantity }}</td><td>₱{{ '%.2f'|format(line.subtotal) }}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="h4 text-end">Total: ₱{{ '%.2f'|format(total) }}</p>
+  <p class="small text-muted">Prescription medicines require approved prescriptions and sufficient remaining stock. Totals are recalculated on the server.</p>
+</div></div>
+<div class="row g-3">
+  <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h5 mb-3">Online payment</h2>
+    <p class="text-muted small">Securely pay on Xendit's hosted checkout. No card details are stored by Pharmacityville. QR Ph can be scanned with GCash or a participating bank app.</p>
+    {% if online_payment_ready %}
+    <form method="post" action="{{ url_for('payments.start_payment') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <fieldset {% if problems %}disabled{% endif %}><legend class="h6">Choose payment method</legend>
+        {% for code, title, description in [
+          ('gcash','GCash','Pay in the GCash checkout flow'),
+          ('qrph','GCash QR / QR Ph','Scan the payment QR using GCash or another QR Ph app'),
+          ('card','Credit / Debit Card','Visa or Mastercard through hosted checkout'),
+          ('apple_pay','Apple Pay','Shown only for supported Apple devices, cards, and enabled merchant accounts')
+        ] %}
+          <div class="form-check border rounded p-3 ps-5 mb-2">
+            <input class="form-check-input" type="radio" name="payment_method" value="{{ code }}" id="method-{{ code }}" {{ 'checked' if loop.first else '' }} required>
+            <label for="method-{{ code }}" class="form-check-label"><strong>{{ title }}</strong><span class="small text-muted d-block">{{ description }}</span></label>
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-success w-100 mt-2">Continue to secure payment</button>
+      </fieldset>
+    </form>
+    {% else %}
+      <div class="alert alert-info mb-0">Online payment is not enabled yet. An administrator must configure Xendit test/live API keys and a secure webhook token. No payments will be collected here until then.</div>
+    {% endif %}
+  </div></div></div>
+  <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h5">Pay at pickup</h2>
+    <p class="text-muted small">Place a Pending order without paying online. Payment must be arranged with the pharmacy.</p>
+    <form method="post" action="{{ url_for('customer.checkout') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="payment_method" value="pickup">
+      <button type="submit" class="btn btn-outline-success w-100" {% if problems %}disabled{% endif %}>Place Order — Pay at Pickup</button>
+    </form>
+    <hr class="my-4">
+    <h2 class="h5">Cash on Delivery (COD)</h2>
+    <p class="text-muted small">Order now and pay cash when the pharmacy confirms delivery. No online payment is required. Delivery availability and any fees must be confirmed with the pharmacy before dispatch.</p>
+    <form method="post" action="{{ url_for('customer.checkout') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="payment_method" value="cod">
+      <div class="mb-3">
+        <label class="form-label" for="delivery_name">Recipient name *</label>
+        <input class="form-control" id="delivery_name" name="delivery_name" type="text" minlength="2" maxlength="100" autocomplete="name" value="{{ current_user.name }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="delivery_phone">Mobile number *</label>
+        <input class="form-control" id="delivery_phone" name="delivery_phone" type="tel" maxlength="24" inputmode="tel" autocomplete="tel" placeholder="09XXXXXXXXX" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="delivery_address">Delivery address *</label>
+        <textarea class="form-control" id="delivery_address" name="delivery_address" minlength="10" maxlength="500" rows="3" autocomplete="street-address" placeholder="House/unit, street, barangay, city/municipality, province" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success w-100" {% if problems %}disabled{% endif %}>Place COD Order — ₱{{ '%.2f'|format(total) }}</button>
+    </form>
+    <a href="{{ url_for('customer.cart') }}" class="btn btn-link mt-2">Back to cart</a>
+  </div></div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | Pharmacityville{% endblock %}
+{% block content %}
+<div class="admin-live-status small text-muted mb-3" aria-live="polite">
+  <span class="admin-live-dot" aria-hidden="true"></span>
+  <span id="admin-live-status-text">Checking for updates…</span>
+</div>
+<div data-admin-live-region="dashboard">
+<section class="admin-page-intro mb-4">
+  <div>
+    <span class="admin-page-kicker">OVERVIEW</span>
+    <h1 class="admin-page-title mb-2">Dashboard</h1>
+    <p class="text-muted mb-0">Welcome back, {{ current_user.name }}. Here's your pharmacy at a glance.</p>
+  </div>
+  <a class="btn btn-outline-success admin-secondary-action" href="{{ url_for('customer.catalog') }}">
+    <i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i> View catalog
+  </a>
+</section>
+
+<!-- pvc-feature-pack-20261011: read-only inventory planning shortcut -->
+<div class="mb-3"><a class="btn btn-outline-success" href="{{ url_for('inventory_insights.inventory_insights') }}"><i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i> Open Inventory Insights &amp; Reorder Plan</a></div>
+
+<!-- pvc-usability-20261011: useful admin shortcuts, no extra database queries. -->
+<nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Admin quick actions">
+  <a class="btn btn-success pvc-action-button" href="{{ url_for('admin_medicines.create_medicine') }}"><i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Add medicine</a>
+  <a class="btn btn-outline-success" href="{{ url_for('admin_medicines.list_medicines', stock='low') }}"><i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i> Check low stock</a>
+  <a class="btn btn-outline-success" href="{{ url_for('admin_orders.list_orders') }}"><i class="bi bi-receipt me-1" aria-hidden="true"></i> Review orders</a>
+  <a class="btn btn-outline-success" href="{{ url_for('prescriptions.admin_requests') }}"><i class="bi bi-file-medical me-1" aria-hidden="true"></i> Prescriptions</a>
+</nav>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+  <div class="col"><div class="card admin-stat-card h-100"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start">
+      <span class="admin-stat-label">Registered customers & admins</span>
+      <span class="admin-stat-icon admin-stat-icon-green"><i class="bi bi-people" aria-hidden="true"></i></span>
+    </div>
+    <div class="admin-stat-number">{{ user_count }}</div><a class="admin-stat-caption admin-stat-link" href="{{ url_for('admin_users.list_users') }}">Manage users <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+  </div></div></div>
+  <div class="col"><div class="card admin-stat-card h-100"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start">
+      <span class="admin-stat-label">Medicine inventory</span>
+      <span class="admin-stat-icon admin-stat-icon-blue"><i class="bi bi-capsule-pill" aria-hidden="true"></i></span>
+    </div>
+    <div class="admin-stat-number">{{ medicine_count }}</div><div class="admin-stat-caption">Products listed</div>
+  </div></div></div>
+  <div class="col"><div class="card admin-stat-card h-100"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start">
+      <span class="admin-stat-label">Customer orders</span>
+      <span class="admin-stat-icon admin-stat-icon-amber"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
+    </div>
+    <div class="admin-stat-number">{{ order_count }}</div><div class="admin-stat-caption">All statuses</div>
+  </div></div></div>
+  <div class="col"><div class="card admin-stat-card h-100"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start">
+      <span class="admin-stat-label">Prescription requests</span>
+      <span class="admin-stat-icon admin-stat-icon-purple"><i class="bi bi-file-earmark-medical" aria-hidden="true"></i></span>
+    </div>
+    <div class="admin-stat-number">{{ pending_prescriptions }}</div>
+    <a class="admin-stat-caption admin-stat-link" href="{{ url_for('prescriptions.admin_requests') }}">Pending review <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+  </div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6"><div class="card admin-finance-card h-100"><div class="card-body">
+    <div class="d-flex gap-2 align-items-center mb-3"><span class="admin-finance-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span><span class="admin-finance-label">Completed order sales value</span></div>
+    <div class="admin-finance-number">₱{{ '{:,.2f}'.format(completed_value) }}</div>
+    <p class="text-muted small mb-0">Total value of completed orders. Includes both online and pay-at-pickup orders; this is not the same as confirmed cash received.</p>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card admin-finance-card h-100"><div class="card-body">
+    <div class="d-flex gap-2 align-items-center mb-3"><span class="admin-finance-icon admin-finance-icon-amber"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><span class="admin-finance-label">Open order value</span></div>
+    <div class="admin-finance-number">₱{{ '{:,.2f}'.format(active_value) }}</div>
+    <p class="text-muted small mb-0">Pending, Preparing and Ready orders; cancelled orders are excluded.</p>
+  </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <div class="row row-cols-1 row-cols-md-2 g-3 align-items-center">
+    <div class="col"><div class="text-muted small">Verified online payments</div><div class="h4 mb-0 text-success">₱{{ '{:,.2f}'.format(online_paid_value) }}</div></div>
+    <div class="col"><div class="text-muted small">Confirmed COD cash</div><div class="h4 mb-0 text-success">₱{{ '{:,.2f}'.format(cod_cash_value) }}</div></div>
+    <div class="col"><div class="text-muted small">Awaiting online payment</div><div class="h4 mb-0">{{ awaiting_payment_count }} orders</div></div>
+    <div class="col"><div class="text-muted small">Refund/reconciliation alerts</div><div class="h4 mb-0 {{ 'text-danger' if refund_alert_count else 'text-success' }}">{{ refund_alert_count }}</div></div>
+  </div>
+</div></div>
+
+<div class="card admin-table-card mb-4">
+  <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <h2 class="h5 fw-bold mb-1"><i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i> Inventory attention</h2>
+      <p class="text-muted small mb-0">Products at 10 units or fewer. Restock decisions should be checked manually.</p>
+    </div>
+    <a href="{{ url_for('admin_medicines.list_medicines', stock='low') }}" class="btn btn-sm btn-outline-success">Review low stock</a>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="badge text-bg-warning">{{ low_stock_count }} low stock</span>
+      <a class="badge text-bg-danger text-decoration-none" href="{{ url_for('admin_medicines.list_medicines', stock='out') }}">{{ out_of_stock_count }} out of stock</a>
+    </div>
+    {% if low_stock %}
+      <div class="row g-2">
+        {% for medicine in low_stock %}
+          <div class="col-sm-6 col-lg-4">
+            <a class="inventory-attention-row" href="{{ url_for('admin_medicines.edit_medicine', medicine_id=medicine.id) }}">
+              <span class="text-truncate" title="{{ medicine.name }}">{{ medicine.name }}</span>
+              <span class="badge {{ 'text-bg-danger' if medicine.stock == 0 else 'text-bg-warning' }}">{{ medicine.stock }} left</span>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="small text-success mb-0"><i class="bi bi-check-circle me-1" aria-hidden="true"></i> No low-stock products right now.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card admin-table-card">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h2 class="h5 mb-1 fw-bold">Recent Orders</h2><p class="text-muted small mb-0">Your latest five orders</p></div>
+    <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin_orders.list_orders') }}">View all orders <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+  </div>
+  {% if recent_orders %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Status</th><th scope="col">Total</th><th scope="col">Date (UTC)</th><th scope="col"><span class="visually-hidden">Details</span></th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+            <tr>
+              <td class="fw-semibold">#{{ order.id }}</td>
+              <td>{{ order.user.name }}</td>
+              <td>
+                {% if order.status == 'Completed' %}<span class="badge text-bg-success">Completed</span>
+                {% elif order.status == 'Cancelled' %}<span class="badge text-bg-danger">Cancelled</span>
+                {% elif order.status == 'Pending' %}<span class="badge text-bg-warning">Pending</span>
+                {% elif order.status == 'Ready' %}<span class="badge text-bg-info">Ready</span>
+                {% else %}<span class="badge text-bg-secondary">{{ order.status }}</span>{% endif %}
+              </td>
+              <td class="fw-semibold">₱{{ '{:,.2f}'.format(order.total) }}</td>
+              <td class="text-muted small">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td><a class="btn btn-sm btn-light border" href="{{ url_for('admin_orders.order_detail', order_id=order.id) }}">View</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="admin-empty-state"><i class="bi bi-inbox" aria-hidden="true"></i><p class="fw-semibold mb-1">No orders yet</p><p class="text-muted small mb-0">New customer orders will appear here.</p></div>
+  {% endif %}
+</div>
+</div><!-- /live region -->
+{% endblock %}

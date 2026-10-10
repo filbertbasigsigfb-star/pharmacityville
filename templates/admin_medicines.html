@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Medicine Management | Pharmacityville{% endblock %}
+{% block content %}
+<div class="admin-live-status small text-muted mb-3" aria-live="polite">
+  <span class="admin-live-dot" aria-hidden="true"></span>
+  <span id="admin-live-status-text">Checking for updates…</span>
+</div>
+<div data-admin-live-region="medicines">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div><h1 class="h2 mb-1">Medicine Management</h1><p class="text-muted mb-0">Search and update your inventory.</p></div>
+  <div class="d-flex gap-2 flex-wrap">
+    <!-- pvc-feature-pack-20261011: inventory analytics -->
+    <a href="{{ url_for('inventory_insights.inventory_insights') }}" class="btn btn-outline-primary"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Inventory Insights</a>
+    <a href="{{ url_for('admin_medicines.export_inventory', search=search, category=selected_category, stock=selected_stock) }}" class="btn btn-outline-success">
+      <i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i> Export CSV
+    </a>
+    <button type="button" class="btn btn-outline-warning" data-pvc-select-low title="Select visible medicines with 10 or fewer units">
+      <i class="bi bi-exclamation-circle" aria-hidden="true"></i> Select low stock
+    </button>
+    <form method="post" id="bulk-restock-form" action="{{ url_for('admin_medicines.restock_selected') }}" class="d-flex align-items-center gap-2 flex-wrap">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <span id="restock-count" class="small text-muted">0 selected</span>
+      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bulkRestockModal" id="restock-review" disabled>
+        <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i> Restock to 100
+      </button>
+    </form>
+    <a href="{{ url_for('admin_medicines.create_medicine') }}" class="btn btn-success">+ Add Medicine</a>
+  </div>
+</div>
+
+<form method="get" action="{{ url_for('admin_medicines.list_medicines') }}" class="card border-0 shadow-sm mb-4">
+  <div class="card-body"><div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label for="search" class="form-label">Search name or description</label>
+      <input id="search" name="search" class="form-control" value="{{ search }}" placeholder="e.g. Paracetamol">
+      <div class="pvc-search-tip">Press <kbd>/</kbd> to search quickly.</div>
+    </div>
+    <div class="col-md-4">
+      <label for="category" class="form-label">Category</label>
+      <select id="category" name="category" class="form-select">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="stock" class="form-label">Stock status</label>
+      <select class="form-select" id="stock" name="stock">
+        <option value="all" {{ 'selected' if selected_stock == 'all' else '' }}>All stock levels</option>
+        <option value="low" {{ 'selected' if selected_stock == 'low' else '' }}>Low stock (1–10)</option>
+        <option value="out" {{ 'selected' if selected_stock == 'out' else '' }}>Out of stock</option>
+        <option value="available" {{ 'selected' if selected_stock == 'available' else '' }}>Available (1+)</option>
+      </select>
+    </div>
+    <div class="col-md-12 d-flex gap-2">
+      <button class="btn btn-success" type="submit">Apply filters</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('admin_medicines.list_medicines') }}">Reset</a>
+    </div>
+  </div></div>
+</form>
+<!-- pvc-usability-20261011: one-click inventory views. -->
+<nav class="pvc-inventory-shortcuts" aria-label="Quick inventory filters">
+  <span class="small text-muted me-1">Quick views:</span>
+  <a href="{{ url_for('admin_medicines.list_medicines') }}" {{ 'aria-current="page"'|safe if selected_stock == 'all' and not search and not selected_category else '' }}>All medicines</a>
+  <a href="{{ url_for('admin_medicines.list_medicines', stock='low') }}" {{ 'aria-current="page"'|safe if selected_stock == 'low' else '' }}>Low stock</a>
+  <a href="{{ url_for('admin_medicines.list_medicines', stock='out') }}" {{ 'aria-current="page"'|safe if selected_stock == 'out' else '' }}>Out of stock</a>
+</nav>
+
+<div class="card border-0 shadow-sm"><div class="card-body">
+  <h2 class="h5 mb-3">Medicines ({{ medicines|length }})</h2>
+  <div class="table-responsive"><table class="table table-striped table-hover align-middle">
+    <thead><tr><th><input type="checkbox" class="form-check-input" id="restock-select-all" aria-label="Select all medicines shown"></th><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Rx</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for medicine in medicines %}
+      <tr>
+        <td><input type="checkbox" class="form-check-input" data-restock-select data-stock="{{ medicine.stock }}" name="medicine_ids" value="{{ medicine.id }}" form="bulk-restock-form" aria-label="Select {{ medicine.name }} for restocking"></td>
+        <td>{{ medicine.id }}</td>
+        <td><strong>{{ medicine.name }}</strong><div class="small text-muted">{{ medicine.description|truncate(60) }}</div></td>
+        <td>{{ medicine.category }}</td>
+        <td>₱{{ '%.2f'|format(medicine.price) }}</td>
+        <td>
+          {% if medicine.stock == 0 %}<span class="badge text-bg-danger">Out of stock</span>
+          {% elif medicine.stock <= 10 %}<span class="badge text-bg-warning">{{ medicine.stock }} left</span>
+          {% else %}<span class="badge text-bg-success">{{ medicine.stock }}</span>{% endif %}
+        </td>
+        <td>{{ 'Yes' if medicine.requires_prescription else 'No' }}</td>
+        <td>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_medicines.edit_medicine', medicine_id=medicine.id) }}">Edit</a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ medicine.id }}">Delete</button>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="text-center py-4">No medicines found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</div></div>
+
+<div class="modal fade" id="bulkRestockModal" tabindex="-1" aria-labelledby="bulkRestockTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title fs-5" id="bulkRestockTitle">Confirm bulk restock</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">Set selected medicines with fewer than 100 units to <strong>100 each</strong>? Existing stock above 100 remains unchanged. This does not create purchases.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-success" type="submit" form="bulk-restock-form">Confirm restock</button>
+    </div>
+  </div></div>
+</div>
+{% for medicine in medicines %}
+<div class="modal fade" id="deleteModal{{ medicine.id }}" tabindex="-1" aria-labelledby="deleteTitle{{ medicine.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title fs-5" id="deleteTitle{{ medicine.id }}">Confirm deletion</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">Delete <strong>{{ medicine.name }}</strong>? This cannot be undone.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <form method="post" action="{{ url_for('admin_medicines.delete_medicine', medicine_id=medicine.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+      </form>
+    </div>
+  </div></div>
+</div>
+{% endfor %}
+</div><!-- /live region -->
+<!-- Selection controls outside the live-swapped region remain stable. -->
+<aside id="pvc-floating-restock" class="pvc-floating-bar pvc-admin-restock" aria-label="Bulk restock actions">
+  <div class="pvc-bar-summary"><strong id="pvc-admin-selected-count">0 medicines selected</strong>
+    <small>Low/out in view: <span id="pvc-admin-low-stock-count">0</span> · Restock target: 100 units</small></div>
+  <div class="pvc-bar-actions">
+    <button class="btn btn-outline-secondary" type="button" data-pvc-clear-restock>Clear</button>
+    <button class="btn btn-outline-warning" type="button" data-pvc-select-low>Select low stock</button>
+    <button id="pvc-admin-review-restock" class="btn btn-success pvc-action-button" type="button" data-bs-toggle="modal" data-bs-target="#bulkRestockModal" disabled>
+      <i class="bi bi-box-arrow-in-down me-1" aria-hidden="true"></i> Review restock
+    </button>
+  </div>
+</aside>
+<div id="pvc-live-feedback" class="visually-hidden" role="status" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/bulk_restock.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Manage Users | Pharmacityville{% endblock %}
+{% block content %}
+<section class="admin-page-intro mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+  <div>
+    <span class="admin-page-kicker">ADMINISTRATION / ACCOUNTS</span>
+    <h1 class="admin-page-title mb-2">User Management</h1>
+    <p class="text-muted mb-0">Create accounts, update details, manage access and reset passwords.</p>
+  </div>
+  <a class="btn btn-success" href="{{ url_for('admin_users.create_user') }}"><i class="bi bi-person-plus me-1"></i> Add User</a>
+</section>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form class="row g-3 align-items-end" method="get" action="{{ url_for('admin_users.list_users') }}">
+      <div class="col-lg-5"><label class="form-label" for="user-search">Search name or email</label>
+        <input class="form-control" id="user-search" type="search" name="q" value="{{ search }}" placeholder="Search users"></div>
+      <div class="col-sm-4 col-lg-2"><label class="form-label" for="user-role">Role</label>
+        <select class="form-select" name="role" id="user-role">
+          <option value="">All roles</option>
+          <option value="customer" {{ 'selected' if role == 'customer' else '' }}>Customer</option>
+          <option value="admin" {{ 'selected' if role == 'admin' else '' }}>Admin</option>
+        </select></div>
+      <div class="col-sm-4 col-lg-2"><label class="form-label" for="user-status">Account status</label>
+        <select class="form-select" name="status" id="user-status">
+          <option value="">All statuses</option>
+          <option value="active" {{ 'selected' if status == 'active' else '' }}>Active</option>
+          <option value="disabled" {{ 'selected' if status == 'disabled' else '' }}>Disabled</option>
+        </select></div>
+      <div class="col-sm-4 col-lg-3 d-flex gap-2">
+        <button class="btn btn-success" type="submit">Filter</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin_users.list_users') }}">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+    <h2 class="h5 mb-0">Accounts</h2><span class="text-muted small">{{ users|length }} shown</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td><div class="fw-semibold">{{ user.name }}{% if user.id == current_user.id %} <span class="text-muted small">(you)</span>{% endif %}</div>
+              <div class="text-muted small">{{ user.email }}</div></td>
+          <td><span class="badge {{ 'text-bg-primary' if user.role == 'admin' else 'text-bg-secondary' }}">{{ user.role|capitalize }}</span></td>
+          <td>{% if user.is_enabled %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-warning">Disabled</span>{% endif %}</td>
+          <td>
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_users.edit_user', user_id=user.id) }}">Edit</a>
+              <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin_users.reset_password', user_id=user.id) }}">Reset Password</a>
+              {% if user.id != current_user.id %}
+                <form method="post" action="{{ url_for('admin_users.toggle_status', user_id=user.id) }}">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-warning btn-sm" type="submit" onclick="return confirm('Change login access for this account?')">{{ 'Disable' if user.is_enabled else 'Enable' }}</button>
+                </form>
+              {% endif %}
+              {% if user.role == 'customer' and user.id != current_user.id %}
+                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUser{{ user.id }}" type="button">Delete</button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="text-center py-5 text-muted">No users match your filters.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% for user in users if user.role == 'customer' and user.id != current_user.id %}
+<div class="modal fade" id="deleteUser{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserTitle{{ user.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title fs-5" id="deleteUserTitle{{ user.id }}">Delete user?</h2>
+      <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <p>Delete <strong>{{ user.name }}</strong> ({{ user.email }})?</p>
+      {% if user.id in users_with_history %}
+        <p class="text-warning-emphasis mb-0"><i class="bi bi-exclamation-triangle me-1"></i>This customer has order, prescription, or support-report history. Deletion will be blocked; use Disable instead.</p>
+      {% else %}
+        <p class="text-danger mb-0">This permanently deletes the account and cannot be undone.</p>
+      {% endif %}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+      <form method="post" action="{{ url_for('admin_users.delete_user', user_id=user.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger" type="submit" {{ 'disabled' if user.id in users_with_history else '' }}>Delete User</button>
+      </form>
+    </div>
+  </div></div>
+</div>
+{% endfor %}
+{% endblock %}

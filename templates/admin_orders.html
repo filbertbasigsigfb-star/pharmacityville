@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}All Orders | Pharmacityville{% endblock %}
+{% block content %}
+<div class="admin-live-status small text-muted mb-3" aria-live="polite">
+  <span class="admin-live-dot" aria-hidden="true"></span>
+  <span id="admin-live-status-text">Checking for updates…</span>
+</div>
+<!-- pvc-final-features-20261011: client-side admin order queue filters -->
+<section id="pvc-final-order-toolbar" class="pvc-final-order-toolbar" aria-label="Quick order queue filters">
+  <div class="row g-2 align-items-center mb-2">
+    <div class="col-md-6"><label for="pvc-final-order-search" class="form-label fw-semibold small mb-1">Search loaded orders</label>
+      <input class="form-control" id="pvc-final-order-search" type="search" placeholder="Order number, customer or status" autocomplete="off"></div>
+    <div class="col-md-6"><p class="small text-muted mb-0 mt-md-3" id="pvc-final-order-count" role="status" aria-live="polite"></p></div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {% for status in ['All','Pending','Preparing','Ready','Completed','Cancelled'] %}
+    <button type="button" class="btn btn-sm btn-outline-success" data-pvc-order-status="{{ status }}" aria-pressed="{{ 'true' if status == 'All' else 'false' }}">
+      {{ status }} <span class="badge text-bg-light" data-pvc-order-badge>0</span>
+    </button>
+    {% endfor %}
+  </div>
+  <div class="small text-muted mt-2">Filters affect only orders already loaded in this admin view. They do not change order statuses.</div>
+</section>
+<div data-admin-live-region="orders">
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h2">Manage Orders</h1><a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+{% if orders %}<div class="card shadow-sm p-3"><div class="table-responsive"><table class="table table-striped align-middle">
+<thead><tr><th>Order #</th><th>Customer</th><th>Date (UTC)</th><th>Status</th><th>Payment</th><th>Total</th><th>Actions</th></tr></thead><tbody>
+{% for order in orders %}<tr><td>{{ order.id }}</td><td>{{ order.user.name }}<br><small class="text-muted">{{ order.user.email }}</small></td><td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ order.status }}</td><td>
+{% if order.payment_attempt %}<span class="badge {{ 'text-bg-success' if order.payment_attempt.state == 'Paid' else 'text-bg-danger' if order.payment_attempt.state == 'LatePaid' else 'text-bg-warning' }}">{{ order.payment_attempt.state }}</span>
+{% elif order.payment_method == 'cod' %}<span class="badge {{ 'text-bg-success' if order.cod_paid_at else 'text-bg-warning' }}">COD · {{ 'Paid' if order.cod_paid_at else 'Unpaid' }}</span>
+{% else %}<span class="text-muted small">Pay at pickup</span>{% endif %}
+</td><td>₱{{ '%.2f'|format(order.total) }}</td><td>
+<a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_orders.order_detail', order_id=order.id) }}">View</a>
+{% if order.status == 'Cancelled' and (not order.payment_attempt or order.payment_attempt.state not in ['Paid','LatePaid']) and not order.cod_paid_at %}<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteOrderModal{{ order.id }}">Delete</button>{% endif %}
+</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% for order in orders if order.status == 'Cancelled' and (not order.payment_attempt or order.payment_attempt.state not in ['Paid','LatePaid']) and not order.cod_paid_at %}
+<div class="modal fade" id="deleteOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteOrderTitle{{ order.id }}" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
+<div class="modal-header"><h2 class="modal-title fs-5" id="deleteOrderTitle{{ order.id }}">Delete cancelled order #{{ order.id }}?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+<div class="modal-body">This permanently deletes its order records. Stock will not change because it was restored when cancelled.</div>
+<div class="modal-footer"><button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Keep</button><form method="post" action="{{ url_for('admin_orders.delete_cancelled', order_id=order.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-danger">Delete Order</button></form></div>
+</div></div></div>
+{% endfor %}
+{% else %}<div class="alert alert-info">No orders have been placed.</div>{% endif %}
+</div><!-- /live region -->
+{% endblock %}

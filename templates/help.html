@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Help & FAQ | Pharmacityville{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <span class="section-kicker">Customer support</span>
+  <h1 class="display-6 fw-bold mt-2">How can we help?</h1>
+  <p class="text-muted">Quick answers for using the Pharmacityville school-project pharmacy website.</p>
+</section>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">
+      <h2 class="h4 mb-3">Frequently asked questions</h2>
+      <div class="accordion" id="pharmacyFaq">
+        {% set faqs = [
+          ('How do I place an order?', 'Log in, browse the medicine catalog, select one or several medicines with quantities, review your cart, and confirm checkout.'),
+          ('Can I order a prescription medicine?', 'Prescription items require an uploaded prescription and pharmacy-admin approval before checkout. This demonstration workflow is not professional dispensing verification.'),
+          ('How do I check my order status?', 'Open My Orders, then View details. Each order shows Pending, Preparing, Ready, or Completed, with a progress indicator.'),
+          ('Can I cancel an order?', 'You can cancel your own order while its status is Pending. Its reserved stock is restored when cancellation succeeds.'),
+          ('What does Ready mean?', 'Ready means the pharmacy has marked the order as prepared. Contact the pharmacy to confirm pickup or delivery arrangements. COD and payment options depend on checkout configuration.'),
+          ('Why is an item out of stock?', 'The catalog reflects the inventory quantities recorded in the database. Products can be unavailable until an administrator updates stock.')
+        ] %}
+        {% for question, answer in faqs %}
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqheading{{ loop.index }}">
+            <button class="accordion-button {{ '' if loop.first else 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#faqanswer{{ loop.index }}" aria-expanded="{{ 'true' if loop.first else 'false' }}" aria-controls="faqanswer{{ loop.index }}">{{ question }}</button>
+          </h3>
+          <div id="faqanswer{{ loop.index }}" class="accordion-collapse collapse {{ 'show' if loop.first else '' }}" data-bs-parent="#pharmacyFaq" aria-labelledby="faqheading{{ loop.index }}">
+            <div class="accordion-body">{{ answer }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body p-4">
+      <h2 class="h5">Quick links</h2>
+      <a class="d-block mb-2" href="{{ url_for('customer.catalog') }}">Browse medicines <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      {% if current_user.is_authenticated and current_user.role != 'admin' %}
+        <a class="d-block mb-2" href="{{ url_for('customer.my_orders') }}">Track my orders <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        <a class="d-block" href="{{ url_for('prescriptions.my_requests') }}">My prescription requests <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        <a class="d-block mt-2" href="{{ url_for('support.new_ticket') }}">Report a problem <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      {% else %}
+        <a class="d-block" href="{{ url_for('auth.login') }}">Log in <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      {% endif %}
+    </div></div>
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">
+      <h2 class="h5">Demo contact details</h2>
+      <p class="mb-2"><i class="bi bi-geo-alt" aria-hidden="true"></i> 123 Wellness Avenue, Barangay Greenfield, Taytay, Rizal</p>
+      <p class="mb-2"><i class="bi bi-envelope" aria-hidden="true"></i> hello@pharmacityville.example</p>
+      <p class="mb-2"><i class="bi bi-telephone" aria-hidden="true"></i> +63 900 000 0000</p>
+      <p class="text-muted small mb-0">These are fictional values. No live support or delivery service is implied.</p>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

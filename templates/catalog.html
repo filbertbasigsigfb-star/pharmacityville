@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}Medicine Catalog | Pharmacityville{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h1 class="h2">Medicine Catalog</h1>
+    <p class="text-muted mb-0">Select several medicines and choose how many of each to add together.</p>
+  </div>
+  {% if current_user.is_authenticated %}
+    <a class="btn btn-outline-success" href="{{ url_for('customer.cart') }}">View Cart</a>
+  {% endif %}
+</div>
+
+<!-- Search and filter the catalog. -->
+<form method="get" action="{{ url_for('customer.catalog') }}" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <label for="search" class="form-label">Search</label>
+    <input class="form-control" id="search" name="search" maxlength="100"
+           placeholder="Search medicine name or category" value="{{ search }}">
+    <div class="pvc-search-tip">Tip: press <kbd>/</kbd> to jump to search.</div>
+  </div>
+  <div class="col-md-3">
+    <label for="category" class="form-label">Category</label>
+    <select class="form-select" id="category" name="category">
+      <option value="">All categories</option>
+      {% for category in categories %}
+        <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>
+          {{ category }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label for="sort" class="form-label">Sort by</label>
+    <select class="form-select" name="sort" id="sort">
+      <option value="name" {{ 'selected' if selected_sort == 'name' else '' }}>Name A–Z</option>
+      <option value="price_low" {{ 'selected' if selected_sort == 'price_low' else '' }}>Price: lowest first</option>
+      <option value="price_high" {{ 'selected' if selected_sort == 'price_high' else '' }}>Price: highest first</option>
+      <option value="stock_high" {{ 'selected' if selected_sort == 'stock_high' else '' }}>Most stock first</option>
+    </select>
+  </div>
+  <div class="col-12 d-flex flex-wrap align-items-center gap-3">
+    <div class="form-check mb-0">
+      <input class="form-check-input" type="checkbox" name="available" value="1"
+             id="available-only" {{ 'checked' if available_only else '' }}>
+      <label class="form-check-label" for="available-only">In-stock medicines only</label>
+    </div>
+    <button class="btn btn-success" type="submit">Apply filters</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('customer.catalog') }}">Reset</a>
+    <span class="ms-auto text-muted small" role="status">{{ medicines|length }} result{{ '' if medicines|length == 1 else 's' }}</span>
+  </div>
+</form>
+
+{% if current_user.is_authenticated %}
+  <div class="alert alert-light border" role="status">
+    <strong>How to order:</strong> Tick the medicines you want, choose a quantity on each card,
+    then press <strong>Add Selected to Cart</strong>. You can select medicines from different categories.
+  </div>
+{% endif %}
+
+<!-- pvc-feature-pack-20261011: browser-local favorites and medicine comparison -->
+<section class="pvc-discovery-toolbar" data-pvc-discovery
+         data-favorites-key="{{ current_user.id if current_user.is_authenticated else 'guest' }}"
+         aria-label="Favorite medicines and comparison">
+  <div class="d-flex flex-wrap align-items-center gap-3">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="pvc-favorites-only">
+      <label class="form-check-label fw-semibold" for="pvc-favorites-only"><i class="bi bi-heart text-danger" aria-hidden="true"></i> Show favorites only</label>
+    </div>
+    <span class="small text-muted" id="pvc-favorite-count">0 saved</span>
+    <span class="small text-muted" id="pvc-filtered-count">{{ medicines|length }} shown in current results</span>
+    <span class="ms-lg-auto small text-muted" id="pvc-compare-count">0 of 3 chosen</span>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="pvc-compare-clear" disabled>Clear comparison</button>
+    <button type="button" class="btn btn-sm btn-outline-success" id="pvc-compare-open" disabled>Compare selected</button>
+  </div>
+  <p class="small text-muted mt-2 mb-0">Favorites are saved in this browser only (not synced to your account). Comparison is for prices and catalog details, not medical advice.</p>
+  <p id="pvc-compare-feedback" class="small text-success mb-0 mt-1" role="status" aria-live="polite"></p>
+  <p id="pvc-no-favorites" class="d-none small text-muted mb-0 mt-2">No saved favorites match the current search and filters. Try resetting the catalog filters.</p>
+</section>
+
+<!-- pvc-final-features-20261011: search, recently viewed, quick details -->
+<section class="pvc-final-toolbar" data-pvc-final-catalog
+         data-user-key="{{ current_user.id if current_user.is_authenticated else 'guest' }}"
+         data-catalog-url="{{ url_for('customer.catalog') }}" aria-label="Catalog convenience tools">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-7">
+      <label for="pvc-final-live-search" class="form-label fw-semibold mb-1">Instant search on this page</label>
+      <input class="form-control" id="pvc-final-live-search" autocomplete="off" type="search"
+             placeholder="Find a medicine without reloading" aria-describedby="pvc-final-live-count">
+      <span class="pvc-final-shortcut">Press / to search · Esc to clear · Use Apply filters above to search the full catalog</span>
+    </div>
+    <div class="col-md-5"><p class="small text-muted mb-0" id="pvc-final-live-count" role="status" aria-live="polite">Loading list…</p></div>
+  </div>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-1">
+    <strong class="small">Recently viewed on this browser</strong>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="pvc-final-clear-recent">Clear history</button>
+  </div>
+  <div id="pvc-final-recent" class="pvc-final-recent-list" aria-live="polite"></div>
+  <p class="small text-muted mt-2 mb-0">Recent views are stored on this browser only; clear the list on a shared computer.</p>
+</section>
+
+<!-- One form processes ALL checked cards in one request. -->
+{% if current_user.is_authenticated %}
+<form id="selected-medicines-form" method="post" action="{{ url_for('customer.add_selected_to_cart') }}">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+{% endif %}
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+  {% for medicine in medicines %}
+    <div class="col" data-pvc-product-card
+         data-medicine-id="{{ medicine.id }}"
+         data-medicine-name="{{ medicine.name }}"
+         data-medicine-category="{{ medicine.category }}"
+         data-medicine-price="₱{{ '%.2f'|format(medicine.price) }}"
+         data-medicine-stock="{{ medicine.stock }} units"
+         data-medicine-rx="{{ 'yes' if medicine.requires_prescription else 'no' }}"
+         data-medicine-description="{{ medicine.description|truncate(180) }}">
+      <div class="card h-100 shadow-sm overflow-hidden pvc-selectable-card">
+        <img class="card-img-top medicine-image"
+             src="{{ medicine.image_url or url_for('static', filename='img/medicine-placeholder.svg') }}"
+             alt="Illustrative packaging for {{ medicine.name }}" loading="lazy"
+             onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/medicine-placeholder.svg') }}';">
+        <div class="card-body d-flex flex-column">
+          <div class="pvc-product-tools">
+            <button type="button" class="pvc-favorite-button" data-pvc-favorite="{{ medicine.id }}" aria-pressed="false" aria-label="Add {{ medicine.name }} to favorites" title="Save to favorites">
+              <i class="bi bi-heart" aria-hidden="true"></i><span class="visually-hidden">Favorite</span>
+            </button>
+            <button type="button" class="pvc-compare-button" data-pvc-compare="{{ medicine.id }}" aria-pressed="false">Compare</button>
+          </div>
+          <p class="small text-muted mb-1">{{ medicine.category }}</p>
+          <h2 class="h5">{{ medicine.name }}</h2>
+          <button class="btn btn-sm btn-outline-success pvc-final-quick-view" type="button"
+                  data-id="{{ medicine.id }}" data-price="₱{{ '%.2f'|format(medicine.price) }}"
+                  data-stock="{{ medicine.stock }} in stock"
+                  data-rx="{{ 'yes' if medicine.requires_prescription else 'no' }}"
+                  data-description="{{ medicine.description or '' }}"
+                  aria-label="Quick details for {{ medicine.name }}">
+            <i class="bi bi-eye" aria-hidden="true"></i> Quick details
+          </button>
+          {% if medicine.requires_prescription %}
+            <p><span class="badge text-bg-warning">Prescription required</span></p>
+            <a class="btn btn-outline-primary btn-sm mb-3"
+               href="{{ url_for('prescriptions.request_prescription', medicine_id=medicine.id) }}">
+              Submit prescription for approval
+            </a>
+          {% endif %}
+          <p class="small text-muted">{{ medicine.description|truncate(90) }}</p>
+          <p class="fw-bold mb-1">₱{{ '%.2f'|format(medicine.price) }}</p>
+          <p class="small text-muted mb-2">
+            {% if medicine.stock == 0 %}<span class="badge text-bg-secondary">Out of stock</span>
+            {% elif medicine.stock <= 10 %}<span class="badge text-bg-warning">Only {{ medicine.stock }} left</span>
+            {% else %}<span class="badge text-bg-success">{{ medicine.stock }} in stock</span>{% endif %}
+          </p>
+          <div class="mt-auto">
+            {% if medicine.stock > 0 and current_user.is_authenticated %}
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox"
+                       id="select-{{ medicine.id }}" name="medicine_ids"
+                       value="{{ medicine.id }}" data-pvc-medicine-checkbox
+                       data-price="{{ '%.2f'|format(medicine.price) }}"
+                       data-medicine-name="{{ medicine.name }}">
+                <label class="form-check-label fw-semibold" for="select-{{ medicine.id }}">
+                  Select this medicine
+                </label>
+              </div>
+              <label class="form-label small" for="quantity-{{ medicine.id }}">Quantity</label>
+              <select class="form-select" id="quantity-{{ medicine.id }}"
+                      name="quantity_{{ medicine.id }}" data-pvc-quantity>
+                {% for quantity in range(1, [medicine.stock, 30, 999]|min + 1) %}
+                  <option value="{{ quantity }}">{{ quantity }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Up to 30 per selection; subject to stock limits.</div>
+            {% elif medicine.stock <= 0 %}
+              <button class="btn btn-outline-secondary w-100" type="button" disabled>Out of stock</button>
+            {% else %}
+              <a class="btn btn-success w-100" href="{{ url_for('auth.login') }}">Log in to order</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12"><p class="text-muted">No medicines matched your search or category.</p></div>
+  {% endfor %}
+</div>
+
+{% if current_user.is_authenticated %}
+  <div class="d-flex justify-content-end align-items-center gap-3 mt-4">
+    <span class="text-muted small pvc-original-cart-help">Maximum 30 different medicines per cart</span>
+    <button class="btn btn-success btn-lg pvc-original-cart-submit" type="submit">
+      Add Selected to Cart
+    </button>
+  </div>
+</form>
+{% endif %}
+
+<!-- pvc-usability-20261011: sticky customer order action, keeps original form and CSRF intact. -->
+{% if current_user.is_authenticated %}
+<aside id="pvc-floating-cart" class="pvc-floating-bar pvc-floating-cart" aria-label="Medicine selection and cart actions">
+  <div class="pvc-bar-summary" role="status" aria-live="polite" aria-atomic="true">
+    <strong id="pvc-selected-count">0 medicines selected</strong>
+    <small id="pvc-selected-subtotal">Estimated subtotal: ₱0.00</small>
+  </div>
+  <div class="pvc-bar-actions">
+    <button id="pvc-clear-selection" type="button" class="btn btn-outline-secondary btn-sm" disabled>Clear</button>
+    <a href="{{ url_for('customer.cart') }}" class="btn btn-outline-success"><i class="bi bi-bag me-1" aria-hidden="true"></i> Cart</a>
+    <button id="pvc-floating-cart-submit" class="btn btn-success pvc-action-button" form="selected-medicines-form" type="submit" disabled>
+      <i class="bi bi-bag-plus me-1" aria-hidden="true"></i> Add selected to cart
+    </button>
+  </div>
+</aside>
+{% endif %}
+<div id="pvc-live-feedback" class="visually-hidden" role="status" aria-live="polite"></div>
+
+<div class="alert alert-info mt-4">
+  Prescription medicines require a submitted document and manual admin approval before checkout.
+  This school-project review does not replace professional prescription validation.
+</div>
+<!-- Comparison modal, outside the add-to-cart form -->
+<div class="modal fade" id="pvc-compare-modal" tabindex="-1" aria-labelledby="pvc-compare-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title h5" id="pvc-compare-title">Compare medicine details</h2>
+      <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <p class="small text-muted">Compare listed price, category and stock. This does not indicate that medicines are interchangeable or suitable for a particular person.</p>
+      <div id="pvc-compare-table" class="table-responsive"></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button></div>
+  </div></div>
+</div>
+<!-- Quick-view is intentionally OUTSIDE of the cart submission form -->
+<div class="modal fade" id="pvc-final-quick-modal" tabindex="-1" aria-labelledby="pvc-final-quick-name" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title h5" id="pvc-final-quick-name">Medicine details</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body"><div class="row g-3"><div class="col-sm-5 text-center">
+      <img id="pvc-final-quick-image" class="pvc-final-quick-image" alt="Medicine image">
+    </div><div class="col-sm-7"><div id="pvc-final-quick-details"></div>
+      <p class="small text-muted">Catalog information only. Ask a pharmacist before selecting a medicine; this does not establish interchangeability.</p>
+    </div></div></div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button></div>
+  </div></div>
+</div>
+{% endblock %}

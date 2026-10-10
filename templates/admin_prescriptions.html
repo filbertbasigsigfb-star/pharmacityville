@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Review Prescriptions | Pharmacityville{% endblock %}
+{% block content %}
+<h1 class="h2 mb-2">Prescription Review</h1>
+<p class="text-muted">Only approve genuine, valid prescriptions after independent pharmacist verification. Demo approval expires after 30 days.</p>
+<div class="table-responsive card shadow-sm p-3"><table class="table table-striped align-middle"><thead><tr><th>Customer</th><th>Medicine</th><th>Quantity</th><th>Document</th><th>Status</th><th>Review</th></tr></thead><tbody>
+{% for row in requests %}<tr><td>{{ row.user.name }}<div class="small text-muted">{{ row.user.email }}</div></td><td>{{ row.medicine.name }}</td><td>{{ row.quantity }}</td><td><a href="{{ url_for('prescriptions.prescription_file', request_id=row.id) }}">View download</a></td><td>{{ row.status }}{% if row.expires_at and row.expires_at <= now %}<div class="text-danger small">Expired</div>{% endif %}</td><td>{% if row.status == 'Pending' %}
+<form class="d-flex flex-wrap gap-2" method="post" action="{{ url_for('prescriptions.review_request', request_id=row.id) }}">
+<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+<button class="btn btn-success btn-sm" type="submit" name="decision" value="Approved" onclick="return confirm('Confirm valid prescription was independently checked?')">Approve</button>
+<button class="btn btn-outline-danger btn-sm" type="submit" name="decision" value="Rejected" onclick="return confirm('Reject this prescription request?')">Reject</button>
+</form>{% else %}Reviewed{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="text-center text-muted">No prescription requests.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

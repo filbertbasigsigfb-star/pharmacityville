@@ -1,0 +1,224 @@
+{%- macro admin_menu() -%}
+  <div class="admin-menu-heading">WORKSPACE</div>
+  <nav class="admin-side-nav" aria-label="Admin sections">
+    <a class="admin-side-link {{ 'active' if request.endpoint == 'admin.dashboard' else '' }}"
+       href="{{ url_for('admin.dashboard') }}" {{ 'aria-current="page"'|safe if request.endpoint == 'admin.dashboard' else '' }}>
+      <i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Dashboard</span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/medicines') else '' }}"
+       href="{{ url_for('admin_medicines.list_medicines') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/medicines') else '' }}>
+      <i class="bi bi-capsule-pill" aria-hidden="true"></i><span>Manage Medicines</span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/inventory-insights') else '' }}"
+       href="{{ url_for('inventory_insights.inventory_insights') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/inventory-insights') else '' }}>
+      <i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>Inventory Insights</span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/orders') else '' }}"
+       href="{{ url_for('admin_orders.list_orders') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/orders') else '' }}>
+      <i class="bi bi-receipt-cutoff" aria-hidden="true"></i><span>Manage Orders</span><span class="badge bg-warning text-dark ms-auto d-none" data-live-pending-count aria-label="Pending orders"></span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/prescriptions') else '' }}"
+       href="{{ url_for('prescriptions.admin_requests') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/prescriptions') else '' }}>
+      <i class="bi bi-file-earmark-medical" aria-hidden="true"></i><span>Review Prescriptions</span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/support') else '' }}"
+       href="{{ url_for('admin_support.list_tickets') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/support') else '' }}>
+      <i class="bi bi-chat-dots" aria-hidden="true"></i><span>Customer Reports</span>
+    </a>
+    <a class="admin-side-link {{ 'active' if request.path.startswith('/admin/users') else '' }}"
+       href="{{ url_for('admin_users.list_users') }}" {{ 'aria-current="page"'|safe if request.path.startswith('/admin/users') else '' }}>
+      <i class="bi bi-people" aria-hidden="true"></i><span>Manage Users</span>
+    </a>
+  </nav>
+  <div class="admin-menu-heading mt-4">PHARMACY WEBSITE</div>
+  <nav class="admin-side-nav" aria-label="Website links">
+    <a class="admin-side-link" href="{{ url_for('index') }}">
+      <i class="bi bi-house-door" aria-hidden="true"></i><span>View Homepage</span>
+    </a>
+    <a class="admin-side-link" href="{{ url_for('customer.catalog') }}">
+      <i class="bi bi-shop" aria-hidden="true"></i><span>Browse Catalog</span>
+    </a>
+    <a class="admin-side-link" href="{{ url_for('help_center') }}">
+      <i class="bi bi-question-circle" aria-hidden="true"></i><span>Help & FAQ</span>
+    </a>
+  </nav>
+{%- endmacro -%}
+{% set admin_layout = current_user.is_authenticated and current_user.role == 'admin' and request.path.startswith('/admin') %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#116b50">
+  <title>{% block title %}Pharmacityville{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <!-- pvc-feature-pack-20261011 -->
+  <link href="{{ url_for('static', filename='css/discovery_upgrade.css') }}?v=20261011b" rel="stylesheet">
+  <!-- pvc-usability-20261011: additive responsive usability styles -->
+  <link href="{{ url_for('static', filename='css/usability_upgrade.css') }}?v=20261011a" rel="stylesheet">
+  <!-- pvc-final-features-20261011 -->
+  <link href="{{ url_for('static', filename='css/final_features.css') }}?v=20261011a" rel="stylesheet">
+</head>
+<body class="{{ 'admin-layout' if admin_layout else 'site-layout' }}"
+      {% if admin_layout %}data-admin-live-url="{{ url_for('admin.live_state') }}"{% endif %}>
+  <a class="skip-to-content" href="#main-content">Skip to main content</a>
+  {% if admin_layout %}
+    <!-- Desktop sidebar: persistent navigation for administrators. -->
+    <aside class="admin-sidebar d-none d-lg-flex" aria-label="Administrator navigation">
+      <a href="{{ url_for('admin.dashboard') }}" class="admin-brand">
+        <span class="admin-brand-mark"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
+        <span><strong>Pharmacityville</strong><small>ADMINISTRATION</small></span>
+      </a>
+      <div class="admin-sidebar-menu">{{ admin_menu() }}</div>
+      <div class="admin-sidebar-bottom">
+        <div class="admin-sidebar-user">
+          <span class="admin-user-avatar">{{ current_user.name[:1]|upper }}</span>
+          <span class="admin-user-info"><strong>{{ current_user.name }}</strong><small>Administrator</small></span>
+        </div>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="admin-logout-btn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Log out</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Mobile sidebar: Bootstrap offcanvas with the same destinations. -->
+    <div class="offcanvas offcanvas-start admin-mobile-sidebar d-lg-none" id="adminMobileMenu"
+         tabindex="-1" aria-labelledby="adminMobileMenuLabel">
+      <div class="offcanvas-header admin-mobile-header">
+        <div class="d-flex gap-2 align-items-center" id="adminMobileMenuLabel">
+          <span class="admin-brand-mark"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
+          <span class="text-white fw-bold">Pharmacityville</span>
+        </div>
+        <button class="btn-close btn-close-white" type="button" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+      </div>
+      <div class="offcanvas-body admin-mobile-body">
+        {{ admin_menu() }}
+        <div class="admin-sidebar-bottom mt-auto">
+          <div class="admin-sidebar-user">
+            <span class="admin-user-avatar">{{ current_user.name[:1]|upper }}</span>
+            <span class="admin-user-info"><strong>{{ current_user.name }}</strong><small>Administrator</small></span>
+          </div>
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-logout-btn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Log out</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-workspace">
+      <header class="admin-topbar">
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="btn admin-menu-toggle d-lg-none"
+                  data-bs-toggle="offcanvas" data-bs-target="#adminMobileMenu"
+                  aria-controls="adminMobileMenu" aria-label="Open admin menu">
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <div>
+            <div class="admin-topbar-eyebrow">PHARMACITYVILLE / ADMIN</div>
+            <div class="admin-topbar-title">{% if request.path.startswith('/admin/inventory-insights') %}Inventory Insights{% elif request.path.startswith('/admin/medicines') %}Medicines{% elif request.path.startswith('/admin/orders') %}Orders{% elif request.path.startswith('/admin/prescriptions') %}Prescriptions{% elif request.path.startswith('/admin/users') %}Users{% elif request.path.startswith('/admin/support') %}Customer Reports{% else %}Dashboard{% endif %}</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <a class="btn btn-success btn-sm pvc-action-button d-none d-md-inline-flex align-items-center gap-1" href="{{ url_for('admin_medicines.create_medicine') }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add medicine</a>
+          <a class="admin-topbar-view d-none d-sm-inline-flex" href="{{ url_for('index') }}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> View store</a>
+          <span class="admin-topbar-avatar" title="{{ current_user.name }}">{{ current_user.name[:1]|upper }}</span>
+        </div>
+      </header>
+  {% else %}
+    <!-- Customer and visitor navigation remains unchanged. -->
+    <nav class="navbar navbar-expand-lg navbar-dark pharmacy-navbar sticky-top" aria-label="Main navigation">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('index') }}"><span aria-hidden="true">✚</span> Pharmacityville</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false"
+                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer.catalog') }}">Catalog</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('help_center') }}">Help & FAQ</a></li>
+            {% if current_user.is_authenticated %}
+              {% if current_user.role == 'admin' %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin Panel</a></li>
+              {% else %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('customer.cart') }}">Cart
+                  {% if nav_cart_count %}<span class="badge rounded-pill text-bg-light ms-1" aria-label="{{ nav_cart_count }} units in cart">{{ nav_cart_count }}</span>{% endif %}
+                </a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('customer.my_orders') }}">My Orders</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('prescriptions.my_requests') }}">My Prescriptions</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('support.my_tickets') }}">My Reports</a></li>
+              {% endif %}
+              <li class="nav-item"><span class="nav-link">Hello, {{ current_user.name }}</span></li>
+              <li class="nav-item">
+                <form method="post" action="{{ url_for('auth.logout') }}" class="ms-lg-2">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
+                </form>
+              </li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Log in</a></li>
+              <li class="nav-item"><a class="btn btn-light btn-sm ms-lg-2" href="{{ url_for('auth.register') }}">Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  {% endif %}
+
+  <main class="{{ 'admin-main' if admin_layout else 'container py-4' }}" id="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if admin_layout %}
+    </div><!-- /.admin-workspace -->
+  {% else %}
+    <footer class="site-footer mt-5 py-5">
+      <div class="container">
+        <div class="row g-4 align-items-start">
+          <div class="col-md-6">
+            <h2 class="h5 fw-bold mb-2">✚ Pharmacityville</h2>
+            <p class="mb-0 footer-description">Your neighborhood pharmacy for everyday health and wellness essentials.</p>
+          </div>
+          <div class="col-md-3">
+            <h3 class="h6 fw-bold">Quick links</h3>
+            <a href="{{ url_for('index') }}" class="footer-link d-block mb-2">Home</a>
+            <a href="{{ url_for('customer.catalog') }}" class="footer-link d-block mb-2">Browse medicines</a>
+            <a href="{{ url_for('index') }}#contact" class="footer-link d-block">Store contact</a>
+          </div>
+          <div class="col-md-3">
+            <h3 class="h6 fw-bold">Information</h3>
+            <p class="footer-description small mb-0">Medicine purchases should follow pharmacist advice. Prescription items require verification.</p>
+          </div>
+        </div>
+        <div class="border-top border-light border-opacity-25 pt-3 mt-4 small footer-description">&copy; 2026 Pharmacityville · School Project</div>
+      </div>
+    </footer>
+  {% endif %}
+  {% if admin_layout %}
+    <div id="admin-live-toast" class="admin-live-toast d-none" role="status" aria-live="polite">
+      <span id="admin-live-toast-text"></span>
+      <a class="btn btn-sm btn-light" href="{{ url_for('admin_orders.list_orders') }}">View orders</a>
+      <button type="button" class="btn-close btn-close-white" id="admin-live-dismiss" aria-label="Dismiss notification"></button>
+    </div>
+  {% endif %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/usability_upgrade.js') }}?v=20261011a" defer></script>
+  {% if admin_layout %}
+    <script src="{{ url_for('static', filename='js/admin_live.js') }}" defer></script>
+  {% endif %}
+  <script src="{{ url_for('static', filename='js/discovery_upgrade.js') }}?v=20261011b" defer></script>
+  <script src="{{ url_for('static', filename='js/final_features.js') }}?v=20261011a" defer></script>
+</body>
+</html>
