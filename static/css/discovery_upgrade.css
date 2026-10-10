@@ -1,0 +1,24 @@
+/* Additional features: favorites, comparison and read-only inventory planner. */
+.pvc-discovery-toolbar {background:#fff;border:1px solid #dce8e2;border-radius:14px;padding:14px 16px;margin-bottom:1rem;box-shadow:0 3px 14px rgba(8,55,40,.045)}
+.pvc-discovery-toolbar .form-check {margin:0}
+.pvc-discovery-toolbar .btn {white-space:nowrap}
+.pvc-product-tools {display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.pvc-favorite-button {height:38px;min-width:38px;border:1px solid #cddbd4;border-radius:9px;color:#c45169;background:white;display:inline-flex;justify-content:center;align-items:center;gap:6px;transition:transform .16s,border-color .16s,background .16s}
+.pvc-favorite-button:hover,.pvc-favorite-button:focus-visible {background:#fff0f3;border-color:#cf5671;transform:translateY(-2px)}
+.pvc-favorite-button.pvc-is-favorite {background:#fff0f3;border-color:#e99aab;color:#b52e50}
+.pvc-compare-button {border:1px solid #bfd8cd;border-radius:9px;padding:6px 10px;background:white;color:#087353;font-size:.875rem;min-height:38px;transition:transform .16s,background .16s}
+.pvc-compare-button:hover,.pvc-compare-button:focus-visible {background:#e9f7f0;transform:translateY(-2px)}
+.pvc-compare-button.pvc-is-comparing {background:#e1f5eb;border-color:#0b7e59;font-weight:650}
+[data-pvc-product-card][hidden] {display:none!important}
+.pvc-insight-metric {border:1px solid #d9e6df;border-radius:13px;box-shadow:0 2px 14px rgba(0,0,0,.03)}
+.pvc-insight-metric .h2,.pvc-insight-metric .h3 {font-weight:750}
+.pvc-category-count {display:flex;justify-content:space-between;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid #edf2ef}
+.pvc-category-count:last-child {border-bottom:0}
+.pvc-insights-page .card {border-color:#e0e9e4}
+.pvc-insights-page .table {min-width:650px}
+.pvc-insights-page .table th,.pvc-insights-page .table td {padding:12px 14px}
+#pvc-compare-table .table {min-width:560px}
+#pvc-compare-table td,#pvc-compare-table th {min-width:130px}
+@media(max-width:600px){.pvc-discovery-toolbar {padding:12px}.pvc-discovery-toolbar .btn {flex-grow:1}.pvc-insights-page .h2{font-size:1.6rem}}
+@media print { .admin-sidebar,.admin-topbar,.pvc-insights-page button,.pvc-insights-page .btn,.pvc-back-to-top {display:none!important} .pvc-insights-page .table {min-width:0} }
+@media (prefers-reduced-motion:reduce){.pvc-favorite-button,.pvc-compare-button{transition:none}}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 350" role="img" aria-labelledby="title">
+<title id="title">Medicine product placeholder</title>
+<rect width="560" height="350" fill="#e5f6ed"/>
+<circle cx="280" cy="175" r="119" fill="#d0ecdf"/>
+<g stroke="#137458" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+<rect x="212" y="112" width="136" height="157" rx="18" fill="#fff"/>
+<rect x="237" y="88" width="86" height="27" rx="7" fill="#91ccb3"/>
+<path d="M239 177h82"/>
+<path d="M280 137v82"/>
+</g>
+<rect x="241" y="238" width="78" height="10" rx="5" fill="#b3deca"/>
+</svg>
