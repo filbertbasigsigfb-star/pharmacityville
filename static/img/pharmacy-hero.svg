@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" role="img" aria-labelledby="title desc">
+<title id="title">Pharmacy illustration</title><desc id="desc">Friendly illustration of a neighborhood pharmacy shelf and medicine products</desc>
+<defs>
+ <linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fffb"/><stop offset="1" stop-color="#d9f7e9"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="15" flood-opacity=".13"/></filter>
+</defs>
+<circle cx="328" cy="256" r="224" fill="#ffffff" opacity=".12"/>
+<circle cx="500" cy="85" r="38" fill="#ffffff" opacity=".1"/>
+<circle cx="115" cy="417" r="25" fill="#ffffff" opacity=".1"/>
+<g filter="url(#shadow)">
+ <rect x="105" y="125" width="434" height="318" rx="31" fill="url(#s)"/>
+ <rect x="132" y="154" width="380" height="61" rx="15" fill="#d0eee0"/>
+ <rect x="251" y="165" width="142" height="40" rx="12" fill="#0a826e"/>
+ <path d="M311 173h22v8h8v9h-8v8h-22v-8h-8v-9h8z" fill="#fff"/>
+ <rect x="149" y="235" width="343" height="14" rx="7" fill="#a9d9c3"/>
+ <rect x="149" y="330" width="343" height="14" rx="7" fill="#a9d9c3"/>
+ <rect x="167" y="265" width="62" height="62" rx="10" fill="#fff" stroke="#68b59d" stroke-width="4"/>
+ <rect x="187" y="253" width="22" height="13" rx="5" fill="#387a67"/>
+ <rect x="180" y="286" width="36" height="21" rx="6" fill="#caeadd"/>
+ <path d="M195 290h7v4h4v6h-4v4h-7v-4h-4v-6h4z" fill="#188169"/>
+ <rect x="252" y="263" width="64" height="64" rx="8" fill="#f8fafc" stroke="#7dc4ad" stroke-width="4"/>
+ <rect x="262" y="274" width="44" height="18" rx="4" fill="#087f72"/>
+ <rect x="269" y="301" width="30" height="7" rx="3" fill="#9ed7c6"/>
+ <rect x="341" y="270" width="36" height="56" rx="9" fill="#ffd8a3"/>
+ <rect x="347" y="258" width="24" height="14" rx="4" fill="#cf8e60"/>
+ <rect x="345" y="288" width="28" height="19" rx="3" fill="#fff4dd"/>
+ <rect x="397" y="269" width="78" height="57" rx="10" fill="#88ced0"/>
+ <path d="M414 296h44" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+ <path d="M435 277v38" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+ <rect x="165" y="353" width="128" height="65" rx="12" fill="#fff" stroke="#a0d2bd" stroke-width="4"/>
+ <rect x="181" y="367" width="95" height="10" rx="5" fill="#acddca"/>
+ <rect x="181" y="388" width="75" height="9" rx="4" fill="#c3e7d8"/>
+ <circle cx="408" cy="379" r="39" fill="#fff" stroke="#80c7ad" stroke-width="5"/>
+ <path d="M396 361h24v11h11v17h-11v11h-24v-11h-11v-17h11z" fill="#168468"/>
+</g>
+<path d="M87 103q28-37 61 0-33 34-61 0z" fill="#c1f4db" opacity=".85"/>
+<path d="M515 454q29-39 65 0-36 40-65 0z" fill="#c1f4db" opacity=".65"/>
+</svg>

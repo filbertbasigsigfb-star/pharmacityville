@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img" aria-label="Illustration of Vitamin C Chewable 250mg">
+  <rect width="640" height="420" rx="26" fill="#dff4ec"/>
+  <ellipse cx="322" cy="375" rx="218" ry="22" fill="#0f3430" opacity=".09"/>
+  <rect x="79" y="46" width="486" height="320" rx="22" fill="#ffffff" stroke="#147d64" stroke-width="4"/>
+  <rect x="79" y="46" width="486" height="97" rx="22" fill="#147d64"/>
+  <path d="M79 115H565V143H79Z" fill="#147d64"/>
+  <text x="110" y="99" font-size="26" font-family="Arial, Helvetica, sans-serif" font-weight="bold" fill="white">PHARMACITYVILLE</text>
+  <circle cx="514" cy="95" r="26" fill="#ffffff" opacity=".22"/>
+  <path d="M514 80v30M499 95h30" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <text x="47" y="184" font-size="18" font-family="Arial, Helvetica, sans-serif" fill="#147d64" letter-spacing="1">VITAMINS</text>
+  <text x="48" y="240" font-size="26" font-family="Arial, Helvetica, sans-serif" font-weight="bold" fill="#17372e">Vitamin C Chewable</text><text x="48" y="279" font-size="26" font-family="Arial, Helvetica, sans-serif" font-weight="bold" fill="#17372e">250mg</text>
+  <rect x="380" y="315" width="161" height="31" rx="15" fill="#dff4ec"/>
+  <text x="462" y="336" text-anchor="middle" font-size="14" font-family="Arial, Helvetica, sans-serif" fill="#147d64">SAMPLE PRODUCT</text>
+</svg>
