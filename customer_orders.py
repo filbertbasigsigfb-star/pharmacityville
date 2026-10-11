@@ -246,7 +246,21 @@ def remove_from_cart(medicine_id):
     return redirect(url_for("customer.cart"))
 
 
-def create_order_from_cart(lines, order_status="Pending", payment_data=None, offline_data=None):
+def validate_delivery_details(form):
+    """Validate recipient, Philippine mobile number, and address for delivery orders."""
+    name = form.get("delivery_name", "").strip()
+    phone = re.sub(r"[\s()-]", "", form.get("delivery_phone", "").strip())
+    address = form.get("delivery_address", "").strip()
+    if not 2 <= len(name) <= 100:
+        raise ValueError("Please enter a delivery recipient name (2–100 characters).")
+    if not re.fullmatch(r"(?:09[0-9]{9}|\+639[0-9]{9})", phone):
+        raise ValueError("Enter a valid Philippine mobile number, such as 09XXXXXXXXX.")
+    if not 10 <= len(address) <= 500:
+        raise ValueError("Enter a complete delivery address (10–500 characters).")
+    return {"delivery_name": name, "delivery_phone": phone, "delivery_address": address}
+
+
+def create_order_from_cart(lines, order_status="Pending", payment_data=None, offline_data=None, delivery_data=None):
     """Reserve stock, consume approved Rx units, and create an order atomically."""
     try:
         # Online orders are paid through Xendit; offline orders must be explicitly
@@ -254,14 +268,16 @@ def create_order_from_cart(lines, order_status="Pending", payment_data=None, off
         method = "online" if payment_data else (offline_data or {}).get("payment_method", "pickup")
         if method not in {"online", "pickup", "cod"}:
             raise ValueError("Invalid payment method.")
-        if method == "cod" and not offline_data:
-            raise ValueError("Delivery details are required for COD.")
+        # Existing Order columns hold delivery contact details for COD and online orders.
+        details = (delivery_data or {}) if method == "online" else ((offline_data or {}) if method == "cod" else {})
+        if method in {"online", "cod"}:
+            details = validate_delivery_details(details)
         order = Order(
             user_id=current_user.id, status=order_status,
             total=Decimal("0.00"), payment_method=method,
-            delivery_name=offline_data.get("delivery_name") if method == "cod" else None,
-            delivery_phone=offline_data.get("delivery_phone") if method == "cod" else None,
-            delivery_address=offline_data.get("delivery_address") if method == "cod" else None,
+            delivery_name=details.get("delivery_name"),
+            delivery_phone=details.get("delivery_phone"),
+            delivery_address=details.get("delivery_address"),
         )
         db.session.add(order)
         db.session.flush()  # Assign order.id without committing yet.
@@ -359,20 +375,11 @@ def checkout():
 
     offline_data = {"payment_method": method}
     if method == "cod":
-        name = request.form.get("delivery_name", "").strip()
-        phone = re.sub(r"[\s()-]", "", request.form.get("delivery_phone", "").strip())
-        address = request.form.get("delivery_address", "").strip()
-        if not 2 <= len(name) <= 100:
-            flash("Please enter a delivery recipient name (2–100 characters).", "danger")
+        try:
+            offline_data.update(validate_delivery_details(request.form))
+        except ValueError as exc:
+            flash(str(exc), "danger")
             return redirect(url_for("customer.checkout"))
-        if not re.fullmatch(r"(?:09[0-9]{9}|\+639[0-9]{9})", phone):
-            flash("Enter a valid Philippine mobile number, such as 09XXXXXXXXX.", "danger")
-            return redirect(url_for("customer.checkout"))
-        if not 10 <= len(address) <= 500:
-            flash("Enter a complete delivery address (10–500 characters).", "danger")
-            return redirect(url_for("customer.checkout"))
-        offline_data.update(delivery_name=name, delivery_phone=phone,
-                            delivery_address=address)
 
     try:
         order = create_order_from_cart(lines, "Pending", offline_data=offline_data)

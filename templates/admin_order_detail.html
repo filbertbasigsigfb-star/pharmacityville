@@ -14,12 +14,6 @@
   <strong>Cash on Delivery:</strong>
   {{ ('Cash received on ' ~ order.cod_paid_at.strftime('%Y-%m-%d %H:%M') ~ ' UTC') if order.cod_paid_at else 'Cash not received' }}
 </div>
-<section class="card bg-light border-0 mb-3"><div class="card-body">
-  <h2 class="h6">Delivery information</h2>
-  <p class="mb-1"><strong>Recipient:</strong> {{ order.delivery_name }}</p>
-  <p class="mb-1"><strong>Phone:</strong> {{ order.delivery_phone }}</p>
-  <p class="mb-0"><strong>Address:</strong> {{ order.delivery_address }}</p>
-</div></section>
 {% if order.status == 'Ready' and not order.cod_paid_at %}
   <div class="border rounded p-3 mb-3">
     <p class="mb-2"><strong>Received the cash?</strong> Record payment only after the delivery representative confirms collecting the correct amount: ₱{{ '%.2f'|format(order.total) }}.</p>
@@ -40,6 +34,14 @@
   </div>
 {% endif %}
 {% else %}<p class="small text-muted">Pay at pickup · Not electronically paid</p>{% endif %}
+{% if order.payment_method in ['online', 'cod'] and order.delivery_name and order.delivery_phone and order.delivery_address %}
+<section class="card bg-light border-0 mb-3"><div class="card-body">
+  <h2 class="h6">Delivery information</h2>
+  <p class="mb-1"><strong>Recipient:</strong> {{ order.delivery_name }}</p>
+  <p class="mb-1"><strong>Phone:</strong> {{ order.delivery_phone }}</p>
+  <p class="mb-0"><strong>Address:</strong> {{ order.delivery_address }}</p>
+</div></section>
+{% endif %}
 <div class="card shadow-sm p-3"><div class="table-responsive"><table class="table"><thead><tr><th>Medicine</th><th>Quantity</th><th>Unit Price</th><th>Subtotal</th></tr></thead><tbody>
 {% for item in order.items %}<tr><td>{{ item.medicine.name if item.medicine else 'Deleted medicine' }}</td><td>{{ item.quantity }}</td><td>₱{{ '%.2f'|format(item.unit_price) }}</td><td>₱{{ '%.2f'|format(item.quantity * item.unit_price) }}</td></tr>{% endfor %}
 </tbody></table></div><p class="h4 text-end">Total: ₱{{ '%.2f'|format(order.total) }}</p></div>

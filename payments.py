@@ -17,7 +17,7 @@ from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
 
 from models import Medicine, Order, PaymentAttempt, PrescriptionRequest, PrescriptionUse, db
-from customer_orders import cart_details, create_order_from_cart
+from customer_orders import cart_details, create_order_from_cart, validate_delivery_details
 
 payments_bp = Blueprint("payments", __name__)
 API_URL = "https://api.xendit.co/sessions"
@@ -165,6 +165,12 @@ def start_payment():
     if not lines or errors or total <= 0 or total > Decimal("99999999.99"):
         flash("Review your cart before starting payment.", "danger")
         return redirect(url_for("customer.cart"))
+    # Validate delivery contact data BEFORE opening a remote payment session.
+    try:
+        delivery_data = validate_delivery_details(request.form)
+    except ValueError as exc:
+        flash(str(exc), "danger")
+        return redirect(url_for("customer.checkout"))
     reference = "PVC-" + secrets.token_hex(12)
     try:
         pdata = create_provider_session(
@@ -177,7 +183,7 @@ def start_payment():
     # Provider checkout is active; now reserve stock and prescription quantities
     # atomically. If local reservation fails, invalidate remote checkout first.
     try:
-        order = create_order_from_cart(lines, "Awaiting Payment", payment_data=pdata)
+        order = create_order_from_cart(lines, "Awaiting Payment", payment_data=pdata, delivery_data=delivery_data)
     except (SQLAlchemyError, ValueError) as exc:
         cancel_provider_session(pdata["provider_session_id"])
         flash("Stock changed before payment started. Review your cart and retry.", "danger")
