@@ -1,7 +1,8 @@
 """No external dependencies: python -m unittest discover -s tests"""
 import ast
 import json
-from pathlib import Path
+import subprocess
+from pathlib import Path, PurePosixPath
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -17,8 +18,33 @@ class RepositoryStaticTests(unittest.TestCase):
             with self.subTest(medicine=name):
                 self.assertTrue((ROOT / entry['image'].lstrip('/')).is_file())
     def test_no_database_or_real_env_in_repo(self):
-        self.assertFalse((ROOT/'.env').exists())
-        self.assertFalse(any(ROOT.rglob('*.db')))
+        # Check files COMMITTED to Git, not temporary data made by Flask tests.
+        # The runtime tests legitimately create instance/pharmacityville.db.
+        result = subprocess.run(
+            ["git", "ls-files", "-z", "--cached"],
+            cwd=ROOT,
+            capture_output=True,
+            check=True,
+        )
+        tracked = [
+            PurePosixPath(path.decode("utf-8", "surrogateescape"))
+            for path in result.stdout.split(b"\\0") if path
+        ]
+        forbidden = []
+        for path in tracked:
+            name = path.name.lower()
+            if (
+                name == ".env"
+                or (name.startswith(".env.") and name != ".env.example")
+                or name.endswith((".db", ".sqlite", ".sqlite3", ".db-wal",
+                                  ".db-shm", ".db-journal"))
+            ):
+                forbidden.append(str(path))
+        self.assertEqual(
+            forbidden, [],
+            "Private environment files or database files are tracked: "
+            + ", ".join(forbidden),
+        )
     def test_core_app_files_present(self):
         for file in ['app.py','models.py','auth.py','payments.py','inventory_insights.py','templates/base.html','templates/catalog.html']:
             self.assertTrue((ROOT/file).is_file())
