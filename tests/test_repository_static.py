@@ -28,7 +28,7 @@ class RepositoryStaticTests(unittest.TestCase):
         )
         tracked = [
             PurePosixPath(path.decode("utf-8", "surrogateescape"))
-            for path in result.stdout.split(b"\\0") if path
+            for path in result.stdout.split(b"\0") if path
         ]
         forbidden = []
         for path in tracked:
