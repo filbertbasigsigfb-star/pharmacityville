@@ -16,7 +16,8 @@ from admin_users import admin_users_bp
 from customer_orders import customer_bp
 from payments import payments_bp
 from prescriptions import prescriptions_bp
-from auth import auth_bp
+from auth import auth_bp, password_fingerprint
+from password_reset import reset_bp
 from support_tickets import support_bp, admin_support_bp
 from inventory_insights import insights_bp  # pvc-feature-pack-20261011
 from models import Medicine, User, db
@@ -53,6 +54,7 @@ def create_app():
 
     # Register each blueprint once. This fixes the Step 3 BuildError.
     app.register_blueprint(auth_bp)
+    app.register_blueprint(reset_bp)
     app.register_blueprint(support_bp)
     app.register_blueprint(admin_support_bp)
     app.register_blueprint(admin_bp)
@@ -68,7 +70,10 @@ def create_app():
     def load_user(user_id):
         try:
             user = db.session.get(User, int(user_id))
-            return user if user and user.is_enabled else None
+            # Invalidate previous login sessions after a password change.
+            if user and user.is_enabled and session.get("_password_fingerprint") == password_fingerprint(user):
+                return user
+            return None
         except (ValueError, TypeError):
             return None
 

@@ -128,3 +128,13 @@ git push -u origin main
 ```
 
 Create the empty GitHub repository in your account before pushing. This ZIP **does not automatically create or publish** a GitHub repository.
+
+
+## Forgot password (email recovery)
+
+The Login page includes a **Forgot password?** link at `/forgot-password`. A request
+sends a 30-minute reset link to an enabled account's registered email. Resetting a
+password invalidates earlier login sessions. The feature reuses the optional
+`SUPPORT_SMTP_*` email settings and requires `PUBLIC_BASE_URL` to be set to the
+site's HTTPS origin. See [docs/PASSWORD_RESET.md](docs/PASSWORD_RESET.md) for setup
+and testing instructions. No database migration is needed.

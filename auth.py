@@ -1,8 +1,9 @@
 """Registration, login, logout, and admin authorization."""
 import re
+import hashlib
 from functools import wraps
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +12,11 @@ from models import User, db
 
 
 auth_bp = Blueprint("auth", __name__)
+
+
+def password_fingerprint(user):
+    """Bind login sessions and password-reset tokens to the current password."""
+    return hashlib.sha256(user.password_hash.encode("utf-8")).hexdigest()
 
 
 def admin_required(view):
@@ -93,6 +99,7 @@ def login():
 
         if user and user.is_enabled and user.check_password(password):
             login_user(user)
+            session["_password_fingerprint"] = password_fingerprint(user)
             flash(f"Welcome, {user.name}!", "success")
             return redirect(url_for("admin.dashboard") if user.role == "admin" else url_for("index"))
 
