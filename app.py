@@ -109,7 +109,17 @@ def create_app():
     @app.route("/")
     def index():
         featured_medicines = Medicine.query.order_by(Medicine.name).limit(4).all()
-        return render_template("index.html", featured_medicines=featured_medicines)
+        categories = [row[0] for row in db.session.query(Medicine.category)
+                      .distinct().order_by(Medicine.category).all() if row[0]]
+        homepage_stats = {
+            "medicine_count": Medicine.query.count(),
+            "category_count": len(categories),
+            "prescription_count": Medicine.query.filter_by(requires_prescription=True).count(),
+        }
+        return render_template(
+            "index.html", featured_medicines=featured_medicines,
+            homepage_categories=categories[:6], homepage_stats=homepage_stats,
+        )
 
     @app.errorhandler(400)
     def bad_request(error):

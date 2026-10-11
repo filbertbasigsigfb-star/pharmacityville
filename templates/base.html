@@ -61,6 +61,7 @@
   <!-- pvc-final-features-20261011 -->
   <link href="{{ url_for('static', filename='css/final_features.css') }}?v=20261011a" rel="stylesheet">
   {%- block login_extra_head -%}{%- endblock -%}
+  <link href="{{ url_for('static', filename='css/landing_refresh.css') }}?v=20261011d" rel="stylesheet">
 </head>
 <body class="{{ 'admin-layout' if admin_layout else 'site-layout' }}"
       {% if admin_layout %}data-admin-live-url="{{ url_for('admin.live_state') }}"{% endif %}>
@@ -221,5 +222,6 @@
   {% endif %}
   <script src="{{ url_for('static', filename='js/discovery_upgrade.js') }}?v=20261011b" defer></script>
   <script src="{{ url_for('static', filename='js/final_features.js') }}?v=20261011a" defer></script>
+  <script src="{{ url_for('static', filename='js/landing_refresh.js') }}?v=20261011d" defer></script>
 </body>
 </html>

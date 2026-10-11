@@ -2,100 +2,159 @@
 {% block title %}Pharmacityville | Your Neighborhood Pharmacy{% endblock %}
 
 {% block content %}
-<!-- HERO -->
-<section class="home-hero overflow-hidden rounded-4 mb-5" aria-labelledby="home-hero-title">
-  <div class="row g-0 align-items-center">
-    <div class="col-lg-7 p-4 p-md-5">
-      <span class="hero-eyebrow">Your neighborhood pharmacy</span>
-      <h1 class="display-4 fw-bold mt-3 mb-3" id="home-hero-title">Pharmacityville</h1>
-      <p class="lead mb-4 hero-subtitle">Caring for your health, one day at a time. Everyday medicines and wellness essentials in one convenient place.</p>
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('customer.catalog') }}" class="btn btn-light btn-lg fw-semibold">Browse Medicines <span aria-hidden="true">→</span></a>
-      {% else %}
-        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg fw-semibold">Register to Order <span aria-hidden="true">→</span></a>
-      {% endif %}
-    </div>
-    <div class="col-lg-5 p-3 p-md-4 text-center">
-      <img class="img-fluid hero-art" src="{{ url_for('static', filename='img/pharmacy-hero.svg') }}"
-           alt="Illustration of a pharmacy counter with medicine bottles and a medical cross"
-           width="640" height="520" fetchpriority="high">
-    </div>
-  </div>
-</section>
-
-<!-- ABOUT -->
-<section id="about" class="home-section mb-5" aria-labelledby="about-title">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-5">
-      <p class="section-kicker mb-2">About us</p>
-      <h2 id="about-title" class="display-6 fw-bold">Your health is our priority.</h2>
-    </div>
-    <div class="col-lg-7">
-      <p class="text-secondary fs-5 mb-0">Pharmacityville is a neighborhood pharmacy focused on making everyday healthcare essentials easier to find. Explore common over-the-counter medicines, vitamins, and personal care products, then place an order for convenient fulfillment.</p>
-    </div>
-  </div>
-</section>
-
-<!-- SERVICES -->
-<section id="services" class="home-section mb-5" aria-labelledby="services-title">
-  <div class="section-heading mb-4">
-    <p class="section-kicker mb-2">What we offer</p>
-    <h2 id="services-title" class="fw-bold">Pharmacy services</h2>
-    <p class="text-secondary mb-0">Helpful essentials for you and your family.</p>
-  </div>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-    <div class="col">
-      <div class="card service-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <span class="service-icon" aria-hidden="true">✚</span>
-          <h3 class="h5 fw-semibold mt-3">OTC Medicines</h3>
-          <p class="text-secondary small mb-0">Everyday non-prescription health and symptom-relief products.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card service-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <span class="service-icon" aria-hidden="true">☀</span>
-          <h3 class="h5 fw-semibold mt-3">Vitamins &amp; Supplements</h3>
-          <p class="text-secondary small mb-0">Nutrition and wellness essentials for daily routines.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card service-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <span class="service-icon" aria-hidden="true">♥</span>
-          <h3 class="h5 fw-semibold mt-3">Health Essentials</h3>
-          <p class="text-secondary small mb-0">First-aid, hygiene, and everyday personal care supplies.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card service-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <span class="service-icon" aria-hidden="true">↗</span>
-          <h3 class="h5 fw-semibold mt-3">Pickup &amp; Delivery</h3>
-          <p class="text-secondary small mb-0">Ask the pharmacy about available order pickup and delivery arrangements.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURED MEDICINES: pulled from Medicine in app.py -->
-<section id="featured" class="home-section mb-5" aria-labelledby="featured-title">
-  <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+<section class="home-shell" aria-label="Homepage content">
+  <div class="home-announcement d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
     <div>
-      <p class="section-kicker mb-2">From our inventory</p>
-      <h2 id="featured-title" class="fw-bold mb-1">Featured medicines</h2>
-      <p class="text-secondary mb-0">A quick look at four items from the catalog.</p>
+      <span class="badge text-bg-success mb-2">NEW</span>
+      <h2 class="h5 mb-1 fw-bold">Faster shopping for medicines and essentials</h2>
+      <p class="mb-0 text-secondary">Use the quick search below, browse popular categories, or go straight to prescriptions, orders, and customer reports.</p>
     </div>
-    <a class="btn btn-outline-success" href="{{ url_for('customer.catalog') }}">View Full Catalog</a>
+    <a class="btn btn-outline-success" href="{{ url_for('customer.catalog') }}">Browse catalog</a>
   </div>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-    {% for medicine in featured_medicines %}
-      <div class="col">
+
+  <section class="home-hero-refresh" aria-labelledby="home-hero-title">
+    <div class="hero-grid">
+      <div>
+        <span class="hero-eyebrow-refresh"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i> Your neighborhood pharmacy</span>
+        <h1 class="hero-title-refresh" id="home-hero-title">Medicines, wellness essentials, and convenient ordering in one place.</h1>
+        <p class="hero-lead-refresh">Pharmacityville helps customers find medicines quickly, place orders easily, upload prescriptions when needed, and contact the pharmacy for help.</p>
+        <div class="hero-badges" aria-label="Store highlights">
+          <span><i class="bi bi-shield-check me-1" aria-hidden="true"></i> Safer prescription workflow</span>
+          <span><i class="bi bi-bag-check me-1" aria-hidden="true"></i> Easy ordering</span>
+          <span><i class="bi bi-chat-dots me-1" aria-hidden="true"></i> Customer support</span>
+        </div>
+        <div class="hero-search-card mt-4">
+          <form method="get" action="{{ url_for('customer.catalog') }}" class="row g-3 align-items-end" role="search">
+            <div class="col-lg-6">
+              <label for="hero-search" class="form-label">Search medicines</label>
+              <input id="hero-search" name="search" class="form-control" placeholder="Search by medicine name or category">
+              <div class="form-text">Example: Paracetamol, Vitamins, Allergy Relief</div>
+            </div>
+            <div class="col-lg-4">
+              <label for="hero-category" class="form-label">Category</label>
+              <select id="hero-category" name="category" class="form-select">
+                <option value="">All categories</option>
+                {% for category in homepage_categories %}
+                  <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-lg-2">
+              <button class="btn btn-success w-100" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Find</button>
+            </div>
+          </form>
+          <div class="hero-search-actions mt-3">
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+              <a class="btn btn-outline-success" href="{{ url_for('admin.dashboard') }}">Admin dashboard</a>
+              <a class="btn btn-outline-success" href="{{ url_for('admin_medicines.list_medicines') }}">Manage medicines</a>
+              <a class="btn btn-outline-success" href="{{ url_for('admin_orders.list_orders') }}">Review orders</a>
+            {% elif current_user.is_authenticated %}
+              <a class="btn btn-outline-success" href="{{ url_for('customer.my_orders') }}">My orders</a>
+              <a class="btn btn-outline-success" href="{{ url_for('prescriptions.my_requests') }}">My prescriptions</a>
+              <a class="btn btn-outline-success" href="{{ url_for('support.new_ticket') }}">Report a problem</a>
+            {% else %}
+              <a class="btn btn-outline-success" href="{{ url_for('auth.login') }}">Log in</a>
+              <a class="btn btn-success" href="{{ url_for('auth.register') }}">Create an account</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="hero-side-card">
+          <img class="hero-side-art" src="{{ url_for('static', filename='img/pharmacy-hero.svg') }}" alt="Illustration of a pharmacy counter with medicine bottles and a medical cross" width="640" height="520" fetchpriority="high">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <p class="text-secondary mb-1">Sample store status (PH time)</p>
+              <div class="store-status" data-store-status>Checking schedule...</div>
+            </div>
+            <div class="text-end">
+              <p class="text-secondary mb-1">Store hours</p>
+              <strong>Mon–Sat 8:00 AM – 7:00 PM</strong><br>
+              <small class="text-secondary">Sunday 9:00 AM – 5:00 PM · Demo hours only</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="home-stats-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Quick overview</p>
+        <h2 id="home-stats-title" class="fw-bold mb-0">What customers can do here</h2>
+      </div>
+    </div>
+    <div class="home-stats-grid">
+      <div class="home-stat-card"><div class="home-stat-value">{{ homepage_stats.medicine_count }}</div><div class="home-stat-label">Medicines and essentials listed</div></div>
+      <div class="home-stat-card"><div class="home-stat-value">{{ homepage_stats.category_count }}</div><div class="home-stat-label">Categories available</div></div>
+      <div class="home-stat-card"><div class="home-stat-value">{{ homepage_stats.prescription_count }}</div><div class="home-stat-label">Prescription items tracked</div></div>
+      <div class="home-stat-card"><div class="home-stat-value">24/7</div><div class="home-stat-label">Online catalog access for customers</div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quick-actions-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Helpful shortcuts</p>
+        <h2 id="quick-actions-title" class="fw-bold mb-0">Start faster</h2>
+      </div>
+    </div>
+    <div class="home-quick-grid">
+      <article class="home-mini-card">
+        <h3 class="fw-bold"><i class="bi bi-capsule me-2 text-success" aria-hidden="true"></i>Browse medicine catalog</h3>
+        <p>Find available medicines, compare categories, and add products to your cart with fewer clicks.</p>
+        <a class="btn btn-outline-success btn-sm" href="{{ url_for('customer.catalog') }}">Open catalog</a>
+      </article>
+      <article class="home-mini-card">
+        <h3 class="fw-bold"><i class="bi bi-file-earmark-medical me-2 text-success" aria-hidden="true"></i>Prescription support</h3>
+        <p>Upload prescriptions for items that require approval and keep track of prescription status in your account.</p>
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+          <a class="btn btn-outline-success btn-sm" href="{{ url_for('prescriptions.admin_requests') }}">Review prescriptions</a>
+        {% else %}
+          <a class="btn btn-outline-success btn-sm" href="{{ url_for('prescriptions.my_requests') if current_user.is_authenticated else url_for('auth.login') }}">{{ 'View prescriptions' if current_user.is_authenticated else 'Log in to upload' }}</a>
+        {% endif %}
+      </article>
+      <article class="home-mini-card">
+        <h3 class="fw-bold"><i class="bi bi-life-preserver me-2 text-success" aria-hidden="true"></i>Customer reports</h3>
+        <p>Need help? Send a report to the admin for payment issues, order concerns, or product-related questions.</p>
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+          <a class="btn btn-outline-success btn-sm" href="{{ url_for('admin_support.list_tickets') }}">Review customer reports</a>
+        {% else %}
+          <a class="btn btn-outline-success btn-sm" href="{{ url_for('support.new_ticket') if current_user.is_authenticated else url_for('auth.login') }}">{{ 'Create report' if current_user.is_authenticated else 'Log in for support' }}</a>
+        {% endif %}
+      </article>
+    </div>
+  </section>
+
+  <section class="home-feature-box" aria-labelledby="popular-category-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Popular categories</p>
+        <h2 id="popular-category-title" class="fw-bold mb-1">Jump to a category</h2>
+        <p class="text-secondary mb-0">Quick filters to help customers go directly to the items they need.</p>
+      </div>
+    </div>
+    <div class="quick-chip-wrap">
+      {% for category in homepage_categories %}
+        <a class="quick-chip" href="{{ url_for('customer.catalog', category=category) }}">{{ category }}</a>
+      {% else %}
+        <span class="text-secondary">No categories available yet.</span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section aria-labelledby="featured-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Featured products</p>
+        <h2 id="featured-title" class="fw-bold mb-1">Featured items from the catalog</h2>
+        <p class="text-secondary mb-0">A quick look at products customers can explore right away.</p>
+      </div>
+      <a class="btn btn-outline-success" href="{{ url_for('customer.catalog') }}">View full catalog</a>
+    </div>
+    <div class="home-featured-grid">
+      {% for medicine in featured_medicines %}
         <article class="card featured-card h-100 border-0 shadow-sm overflow-hidden">
           <img class="card-img-top featured-image"
                src="{{ medicine.image_url or url_for('static', filename='img/medicine-placeholder.svg') }}"
@@ -114,46 +173,91 @@
             </div>
           </div>
         </article>
+      {% else %}
+        <div class="home-info-card">
+          <p class="mb-2 fw-bold">No medicines are listed yet.</p>
+          <p class="text-secondary small mb-0">An administrator can add medicines from the admin panel.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section aria-labelledby="services-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Why choose Pharmacityville</p>
+        <h2 id="services-title" class="fw-bold mb-1">Designed for better customer experience</h2>
+        <p class="text-secondary mb-0">These sections help make the site easier to understand and use.</p>
       </div>
-    {% else %}
-      <div class="col-12">
-        <div class="empty-featured rounded-4 p-4 text-center">
-          <p class="mb-2">No medicines are listed yet.</p>
-          <p class="text-secondary small mb-0">An administrator can add medicines from Manage Medicines.</p>
+    </div>
+    <div class="home-info-grid">
+      <article class="home-info-card"><div class="icon-wrap"><i class="bi bi-search"></i></div><h3 class="h5 fw-bold">Quick search</h3><p class="text-secondary mb-0">Customers can search medicines immediately from the homepage without first opening the catalog.</p></article>
+      <article class="home-info-card"><div class="icon-wrap"><i class="bi bi-grid"></i></div><h3 class="h5 fw-bold">Category shortcuts</h3><p class="text-secondary mb-0">Direct category buttons help visitors reach the right products faster and reduce confusion.</p></article>
+      <article class="home-info-card"><div class="icon-wrap"><i class="bi bi-clock-history"></i></div><h3 class="h5 fw-bold">Store status</h3><p class="text-secondary mb-0">A live open-or-closed indicator makes the homepage more informative and useful for first-time visitors.</p></article>
+      <article class="home-info-card"><div class="icon-wrap"><i class="bi bi-chat-square-text"></i></div><h3 class="h5 fw-bold">Support access</h3><p class="text-secondary mb-0">Customers can see right away that they can send reports or concerns to the pharmacy administrators.</p></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-it-works-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">How it works</p>
+        <h2 id="how-it-works-title" class="fw-bold mb-1">Ordering in four simple steps</h2>
+      </div>
+    </div>
+    <div class="home-steps">
+      <article class="home-step"><div class="home-step-number">1</div><h3 class="h6 fw-bold">Search or browse</h3><p class="text-secondary mb-0">Open the catalog or search directly from the homepage.</p></article>
+      <article class="home-step"><div class="home-step-number">2</div><h3 class="h6 fw-bold">Add to cart</h3><p class="text-secondary mb-0">Select quantities and add your chosen medicines to the cart.</p></article>
+      <article class="home-step"><div class="home-step-number">3</div><h3 class="h6 fw-bold">Upload prescription if needed</h3><p class="text-secondary mb-0">Prescription medicines require approval before checkout.</p></article>
+      <article class="home-step"><div class="home-step-number">4</div><h3 class="h6 fw-bold">Choose payment and place order</h3><p class="text-secondary mb-0">Use supported payment methods or place an order for pickup or delivery options.</p></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="faq-title">
+    <div class="section-title-row mb-3">
+      <div>
+        <p class="section-kicker mb-2">Frequently asked questions</p>
+        <h2 id="faq-title" class="fw-bold mb-1">Helpful information before ordering</h2>
+      </div>
+    </div>
+    <div class="home-faq-card">
+      <div class="accordion accordion-flush" id="homeFaqAccordion">
+        <div class="accordion-item">
+          <h3 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#homeFaqOne" aria-expanded="true">Do I need an account to order?</button></h3>
+          <div id="homeFaqOne" class="accordion-collapse collapse show" data-bs-parent="#homeFaqAccordion"><div class="accordion-body">Yes. Customers need an account to place orders, track prescriptions, and send support reports.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#homeFaqTwo">Can I buy prescription medicines directly?</button></h3>
+          <div id="homeFaqTwo" class="accordion-collapse collapse" data-bs-parent="#homeFaqAccordion"><div class="accordion-body">Prescription medicines require a prescription submission and admin approval before purchase.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#homeFaqThree">What if I have a payment or order problem?</button></h3>
+          <div id="homeFaqThree" class="accordion-collapse collapse" data-bs-parent="#homeFaqAccordion"><div class="accordion-body">Use the customer reports feature after logging in so the admin can review and respond to your concern.</div></div>
         </div>
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  </section>
+
+  <section class="home-cta d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3" aria-labelledby="cta-title">
+    <div>
+      <p class="section-kicker mb-2">Ready to begin?</p>
+      <h2 id="cta-title" class="fw-bold mb-2">Start browsing the catalog or create your customer account.</h2>
+      <p class="text-secondary mb-0">This updated homepage focuses on clearer navigation, stronger calls to action, and better user guidance.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-success" href="{{ url_for('customer.catalog') }}">Browse catalog</a>
+      {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <a class="btn btn-outline-success" href="{{ url_for('admin.dashboard') }}">Admin dashboard</a>
+      {% elif current_user.is_authenticated %}
+        <a class="btn btn-outline-success" href="{{ url_for('customer.my_orders') }}">My orders</a>
+      {% else %}
+        <a class="btn btn-outline-success" href="{{ url_for('auth.register') }}">Register</a>
+      {% endif %}
+    </div>
+  </section>
 </section>
 
-<!-- STORE HOURS & CONTACT: replace demonstration values with real information -->
-<section id="contact" class="home-section mb-4" aria-labelledby="contact-title">
-  <div class="section-heading mb-4">
-    <p class="section-kicker mb-2">Visit or get in touch</p>
-    <h2 id="contact-title" class="fw-bold">Store hours &amp; contact</h2>
-  </div>
-  <div class="row g-3">
-    <div class="col-md-6">
-      <div class="card contact-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="h5 fw-bold mb-3">Opening hours</h3>
-          <div class="d-flex justify-content-between border-bottom py-2"><span>Monday – Saturday</span><strong>8:00 AM – 7:00 PM</strong></div>
-          <div class="d-flex justify-content-between py-2"><span>Sunday</span><strong>9:00 AM – 5:00 PM</strong></div>
-          <p class="text-secondary small mb-0 mt-3">Sample hours for the school project. Replace with your actual schedule.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card contact-card h-100 border-0 shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="h5 fw-bold mb-3">Contact details</h3>
-          <p class="mb-2"><strong>Address:</strong> 123 Wellness Avenue, Barangay Greenfield, Taytay, Rizal</p>
-          <p class="mb-2"><strong>Phone:</strong> +63 900 000 0000</p>
-          <p class="mb-2"><strong>Email:</strong> hello@pharmacityville.example</p>
-          <p class="text-secondary small mb-0 mt-3">Fictional demonstration contact details for this school project. Not a real business address or contact number.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<button type="button" class="home-back-to-top" data-back-to-top aria-label="Back to top">
+  <i class="bi bi-arrow-up"></i>
+</button>
 {% endblock %}
